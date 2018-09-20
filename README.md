@@ -1,2 +1,1 @@
-# sdx
-Seamless Developer Experience
+# Seamless Developer Experience
