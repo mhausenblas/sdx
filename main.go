@@ -7,17 +7,27 @@ import (
 )
 
 const (
-	StatusOnline        = "ONLINE"
-	StatusOffline       = "OFFLINE"
+	// representing the online state:
+	StatusOnline = "ONLINE"
+	// representing the offline state:
+	StatusOffline = "OFFLINE"
+	// how long to try to get a result when probing:
 	ProbeTimeoutSeconds = 2
+	// how quick to check connection:
+	CheckConnectionDelaySeconds = 2
+	// how quick to sync reconcile state:
+	SyncStateSeconds = 2
 )
 
 func main() {
+	// the endpoint we're using to check if we're online or offline
+	// TODO(mhausenblas): change to API server address or make it configurable?
 	probeURL := "http://www.google.com"
-	fmt.Printf("Starting SDX service\n")
-	// the status of the connection
-	var constat chan string
-
+	// the status of the connection, can be StatusXXX
+	constat := make(chan string)
+	// the connection detector, simply tries to do an HTTP GET against probeURL
+	// and if *anything* comes back we consider ourselves to be online, otherwise
+	// some network issues prevents us from doing the GET and we are likely offline.
 	go func() {
 		for {
 			client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
@@ -29,12 +39,25 @@ func main() {
 			}
 			fmt.Printf("Connection detection [%v], probe %v resulted in %v \n", StatusOnline, probeURL, resp.Status)
 			constat <- StatusOnline
-			time.Sleep(2 * time.Second)
+			time.Sleep(CheckConnectionDelaySeconds * time.Second)
 		}
 	}()
 	for {
+		// read in status from connection detector
 		msg := <-constat
-		fmt.Println(msg)
-		time.Sleep(5 * time.Second)
+		syncNReconcile(msg)
+		// wait for next round of sync & reconciliation:
+		time.Sleep(SyncStateSeconds * time.Second)
+	}
+}
+
+func syncNReconcile(status string) {
+	switch status {
+	case StatusOffline:
+		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
+	case StatusOnline:
+		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
+	default:
+		fmt.Printf("I don't recognize %v, blame MH9\n", status)
 	}
 }
