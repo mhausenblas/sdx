@@ -3,7 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -18,6 +21,8 @@ const (
 	CheckConnectionDelaySeconds = 2
 	// how quick to sync reconcile state:
 	SyncStateSeconds = 2
+	// the directory to keep track of the state:
+	StateCacheDir = "/tmp/kube-sdx"
 )
 
 func main() {
@@ -63,13 +68,30 @@ func syncNReconcile(status, namespace string) {
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
-		r, err := kubectl(true, "get", "--namespace="+namespace, "pods")
+		r, err := kubectl(true, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
 		if err != nil {
-			fmt.Printf("Can't cuddle the cluster due to %v/n", err)
+			fmt.Printf("Can't cuddle the cluster due to %v\n", err)
 			return
 		}
-		fmt.Printf("\n%v\n", r)
+		err = dump(r, "deployments")
+		if err != nil {
+			fmt.Printf("Can't dump state due to %v\n", err)
+			return
+		}
 	default:
 		fmt.Printf("I don't recognize %v, blame MH9\n", status)
 	}
+}
+
+func dump(yamlblob, context string) error {
+	if _, err := os.Stat(StateCacheDir); os.IsNotExist(err) {
+		os.Mkdir(StateCacheDir, os.ModePerm)
+	}
+	ts := time.Now().UnixNano()
+	fn := filepath.Join(StateCacheDir, fmt.Sprintf("%v_%v", ts, context))
+	err := ioutil.WriteFile(fn, []byte(yamlblob), 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
