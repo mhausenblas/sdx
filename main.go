@@ -12,7 +12,7 @@ const (
 	// representing the offline state:
 	StatusOffline = "OFFLINE"
 	// how long to try to get a result when probing:
-	ProbeTimeoutSeconds = 2
+	ProbeTimeoutSeconds = 10
 	// how quick to check connection:
 	CheckConnectionDelaySeconds = 2
 	// how quick to sync reconcile state:
@@ -33,9 +33,9 @@ func main() {
 			client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 			resp, err := client.Get(probeURL)
 			if err != nil {
-				fmt.Printf("Connection detection [%v]\n", StatusOffline)
+				fmt.Printf("Connection detection [%v], probe resulted in %v\n", StatusOffline, err)
 				constat <- StatusOffline
-				break
+				continue
 			}
 			fmt.Printf("Connection detection [%v], probe %v resulted in %v \n", StatusOnline, probeURL, resp.Status)
 			constat <- StatusOnline
