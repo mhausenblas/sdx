@@ -26,7 +26,7 @@ func kubectl(withstderr bool, cmd string, args ...string) (string, error) {
 func shellout(withstderr bool, cmd string, args ...string) (string, error) {
 	result := ""
 	var out bytes.Buffer
-	fmt.Printf("%v", cmd+" "+strings.Join(args, " "))
+	fmt.Printf("%v\n", cmd+" "+strings.Join(args, " "))
 	c := exec.Command(cmd, args...)
 	c.Env = os.Environ()
 	if withstderr {

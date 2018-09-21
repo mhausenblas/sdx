@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,11 +21,16 @@ const (
 )
 
 func main() {
+	// the namespace we're operating on (sync & reconcile)
+	namespace := flag.String("namespace", "default", "the namespace you want to keep alive")
 	// the endpoint we're using to check if we're online or offline
 	// TODO(mhausenblas): change to API server address or make it configurable?
 	probeURL := "http://www.google.com"
 	// the status of the connection, can be StatusXXX
 	constat := make(chan string)
+
+	flag.Parse()
+
 	// the connection detector, simply tries to do an HTTP GET against probeURL
 	// and if *anything* comes back we consider ourselves to be online, otherwise
 	// some network issues prevents us from doing the GET and we are likely offline.
@@ -44,25 +50,25 @@ func main() {
 	}()
 	for {
 		// read in status from connection detector
-		msg := <-constat
-		syncNReconcile(msg)
+		status := <-constat
+		syncNReconcile(status, *namespace)
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
 	}
 }
 
-func syncNReconcile(status string) {
+func syncNReconcile(status, namespace string) {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
-		r, err := kubectl(true, "get", "pods", "--all-namespaces")
+		r, err := kubectl(true, "get", "--namespace="+namespace, "pods")
 		if err != nil {
 			fmt.Printf("Can't cuddle the cluster due to %v/n", err)
 			return
 		}
-		fmt.Printf("%v\n", r)
+		fmt.Printf("\n%v\n", r)
 	default:
 		fmt.Printf("I don't recognize %v, blame MH9\n", status)
 	}
