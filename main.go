@@ -57,6 +57,12 @@ func syncNReconcile(status string) {
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
+		r, err := kubectl(true, "get", "pods", "--all-namespaces")
+		if err != nil {
+			fmt.Printf("Can't cuddle the cluster due to %v/n", err)
+			return
+		}
+		fmt.Printf("%v\n", r)
 	default:
 		fmt.Printf("I don't recognize %v, blame MH9\n", status)
 	}
