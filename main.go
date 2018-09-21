@@ -66,6 +66,8 @@ func syncNReconcile(status, namespace string) {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
+		checkLocal()
+
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
 		r, err := kubectl(true, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
@@ -73,7 +75,7 @@ func syncNReconcile(status, namespace string) {
 			fmt.Printf("Can't cuddle the cluster due to %v\n", err)
 			return
 		}
-		err = dump(r, "deployments")
+		err = dump("deployments", r)
 		if err != nil {
 			fmt.Printf("Can't dump state due to %v\n", err)
 			return
@@ -83,15 +85,18 @@ func syncNReconcile(status, namespace string) {
 	}
 }
 
-func dump(yamlblob, context string) error {
+// stores a YAML doc in a file in format timestamp + resource kind
+func dump(reskind, yamlblob string) error {
 	if _, err := os.Stat(StateCacheDir); os.IsNotExist(err) {
 		os.Mkdir(StateCacheDir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
 	fn := filepath.Join(StateCacheDir, fmt.Sprintf("%v_%v", ts, context))
 	err := ioutil.WriteFile(fn, []byte(yamlblob), 0644)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
+}
+
+func checkLocal() {
+	// check if Minikube or Minishift is running
+	// if not running, launch it
 }
