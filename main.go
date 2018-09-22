@@ -24,7 +24,7 @@ const (
 )
 
 func main() {
-	// the namespace we're operating on (sync & reconcile)
+	// the namespace we're trying to keep alive:
 	namespace := flag.String("namespace", "default", "the namespace you want to keep alive")
 	// the local context to use
 	clocal := flag.String("local", "minikube", "the local context to use")
@@ -72,6 +72,9 @@ func main() {
 	for {
 		// read in status from connection detector:
 		status = <-constat
+		if prevstatus == "" {
+			prevstatus = status
+		}
 		// sync state and reconcile, if necessary:
 		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest)
 		if tsl != "" {
@@ -89,10 +92,6 @@ func main() {
 func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string) (tsLatest string) {
 	withstderr := true
 	verbose := false
-	// only attempt to sync and reconcile if anything has changed:
-	if status == prevstatus {
-		return ""
-	}
 	// capture the current namespace state and dump it
 	// as one YAML file in the respective online (remote)
 	// or offline (local) subdirectory:
@@ -104,6 +103,10 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	tsLatest, err = dump(status, namespacestate)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't dump namespace state due to %v\n", err)
+		return ""
+	}
+	// only attempt to reconcile if anything has changed:
+	if status == prevstatus {
 		return ""
 	}
 	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
