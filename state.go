@@ -57,11 +57,11 @@ func ensure(status, clocal, cremote string) {
 // restorefrom applies resources from the YAML doc at:
 // $StateCacheDir/inv($State)/$TS_LAST
 func restorefrom(status, tsLast string) {
-	fmt.Printf("Restoring state from %v/%v", status, tsLast)
+	fmt.Printf("Restoring state from %v/%v\n", status, tsLast)
 }
 
 // use switches over to provided context as in:
 // `kubectl config use-context minikube`
 func use(context string) {
-	fmt.Printf("Switching over to context %v", context)
+	fmt.Printf("Switching over to context %v\n", context)
 }
