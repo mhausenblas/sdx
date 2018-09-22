@@ -28,6 +28,10 @@ const (
 func main() {
 	// the namespace we're operating on (sync & reconcile)
 	namespace := flag.String("namespace", "default", "the namespace you want to keep alive")
+	// the local context to use
+	clocal := flag.String("local", "minikube", "the local context to use")
+	// the remote context to use
+	cremote := flag.String("remote", "", "the remote context to use")
 	// the endpoint we're using to check if we're online or offline
 	// TODO(mhausenblas): change to API server address or make it configurable?
 	probeURL := "http://www.google.com"
@@ -37,6 +41,15 @@ func main() {
 	var status, prevstatus string
 
 	flag.Parse()
+
+	// make sure we have a remote context to work with:
+	if *cremote == "" {
+		fmt.Printf("\x1b[91mI'm sorry Dave, I'm afraid I can't do that.\n\x1b[0m")
+		fmt.Printf("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n\n")
+		contexts, _ := kubectl(false, false, "config", "get-contexts")
+		fmt.Println(contexts)
+		os.Exit(1)
+	}
 
 	// the connection detector, simply tries to do an HTTP GET against probeURL
 	// and if *anything* comes back we consider ourselves to be online, otherwise
@@ -60,7 +73,7 @@ func main() {
 		// read in status from connection detector:
 		status = <-constat
 		// sync state and reconcile, if necessary:
-		syncNReconcile(status, prevstatus, *namespace)
+		syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote)
 		prevstatus = status
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
@@ -70,7 +83,7 @@ func main() {
 // syncNReconcile syncs the state, reconciles (applies to new environment),
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
-func syncNReconcile(status, prevstatus, namespace string) {
+func syncNReconcile(status, prevstatus, namespace, clocal, cremote string) {
 	withstderr := true
 	verbose := false
 	// only attempt to sync and reconcile if anything has changed:
@@ -82,16 +95,15 @@ func syncNReconcile(status, prevstatus, namespace string) {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
 		ensurelocal()
-		restore()
-		selectcontext()
+		restorefrom(status)
+		use(clocal)
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
-		r, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
+		r, err := capture(withstderr, verbose, namespace)
 		if err != nil {
-			fmt.Printf("Can't cuddle the cluster due to %v\n", err)
 			return
 		}
-		err = dump("deployments", r)
+		err = dump(status, "deployments", r)
 		if err != nil {
 			fmt.Printf("Can't dump state due to %v\n", err)
 			return
@@ -101,13 +113,32 @@ func syncNReconcile(status, prevstatus, namespace string) {
 	}
 }
 
+// capture queries the current state in the active namespace by exporting
+// the state of deployments and services as a YAML doc
+func capture(withstderr, verbose bool, namespace string) (string, error) {
+	yamldoc := "---"
+	deploys, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		return "", err
+	}
+	svcs, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "services", "--export", "--output=yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		return "", err
+	}
+	yamldoc = deploys + "---\n" + svcs
+	return yamldoc, nil
+}
+
 // stores a YAML doc in a file in format timestamp + resource kind
-func dump(reskind, yamlblob string) error {
-	if _, err := os.Stat(StateCacheDir); os.IsNotExist(err) {
-		os.Mkdir(StateCacheDir, os.ModePerm)
+func dump(status, reskind, yamlblob string) error {
+	targetdir := filepath.Join(StateCacheDir, status)
+	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
+		os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(StateCacheDir, fmt.Sprintf("%v_%v", ts, reskind))
+	fn := filepath.Join(targetdir, fmt.Sprintf("%v_%v", ts, reskind))
 	err := ioutil.WriteFile(fn, []byte(yamlblob), 0644)
 	return err
 }
@@ -118,11 +149,11 @@ func ensurelocal() {
 }
 
 // applies resources from $StateCacheDir/inv($State)/$TS_$RESKIND
-func restore() {
+func restorefrom(status string) {
 
 }
 
-// switches over to local context, like `kubectl config use-context minikube`
-func selectcontext() {
-
+// switches over to context, as in `kubectl config use-context minikube`
+func use(context string) {
+	fmt.Printf("Switching over to context %v", context)
 }
