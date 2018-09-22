@@ -39,6 +39,8 @@ func main() {
 	constat := make(chan string)
 	// the current and previous status
 	var status, prevstatus string
+	// timestamp of most recent dump
+	var tsLatest string
 
 	flag.Parse()
 
@@ -50,7 +52,7 @@ func main() {
 		fmt.Println(contexts)
 		os.Exit(1)
 	}
-
+	showcfg(*clocal, *cremote, *namespace)
 	// the connection detector, simply tries to do an HTTP GET against probeURL
 	// and if *anything* comes back we consider ourselves to be online, otherwise
 	// some network issues prevents us from doing the GET and we are likely offline.
@@ -73,7 +75,10 @@ func main() {
 		// read in status from connection detector:
 		status = <-constat
 		// sync state and reconcile, if necessary:
-		syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote)
+		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest)
+		if tsl != "" {
+			tsLatest = tsl
+		}
 		prevstatus = status
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
@@ -83,34 +88,43 @@ func main() {
 // syncNReconcile syncs the state, reconciles (applies to new environment),
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
-func syncNReconcile(status, prevstatus, namespace, clocal, cremote string) {
+func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string) (tsLatest string) {
 	withstderr := true
 	verbose := false
 	// only attempt to sync and reconcile if anything has changed:
 	if status == prevstatus {
-		return
+		return ""
+	}
+	// capture the current namespace state and dump it
+	// as one YAML file in the respective online (remote)
+	// or offline (local) subdirectory:
+	namespacestate, err := capture(withstderr, verbose, namespace)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't capture namespace state due to %v\n", err)
+		return ""
+	}
+	tsLatest, err = dump(status, namespacestate)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't dump namespace state due to %v\n", err)
+		return ""
 	}
 	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
+	// and respectively switch context (also, make sure remote or local are available):
 	switch status {
 	case StatusOffline:
-		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
-		ensurelocal()
-		restorefrom(status)
+		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
+		ensure(status)
+		restorefrom(StatusOnline, tsLast)
 		use(clocal)
 	case StatusOnline:
-		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
-		r, err := capture(withstderr, verbose, namespace)
-		if err != nil {
-			return
-		}
-		err = dump(status, "deployments", r)
-		if err != nil {
-			fmt.Printf("Can't dump state due to %v\n", err)
-			return
-		}
+		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
+		ensure(status)
+		restorefrom(StatusOffline, tsLast)
+		use(cremote)
 	default:
-		fmt.Printf("I don't recognize %v, blame MH9\n", status)
+		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
+	return
 }
 
 // capture queries the current state in the active namespace by exporting
@@ -132,28 +146,50 @@ func capture(withstderr, verbose bool, namespace string) (string, error) {
 }
 
 // stores a YAML doc in a file in format timestamp + resource kind
-func dump(status, reskind, yamlblob string) error {
+func dump(status, yamldoc string) (string, error) {
 	targetdir := filepath.Join(StateCacheDir, status)
 	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
 		os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(targetdir, fmt.Sprintf("%v_%v", ts, reskind))
-	err := ioutil.WriteFile(fn, []byte(yamlblob), 0644)
-	return err
+	fn := filepath.Join(targetdir, fmt.Sprintf("%v", ts))
+	err := ioutil.WriteFile(fn, []byte(yamldoc), 0644)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%v", ts), nil
 }
 
-// checks if Minikube or Minishift is running and if not, launches it
-func ensurelocal() {
-
+// ensure checks if, depending on the status, the remote or local
+// clusters are actually available (in case of local, launches it
+//  if this is not the case)
+func ensure(status, clocal, cremote string) {
+	switch status {
+	case StatusOffline:
+		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
+	case StatusOnline:
+		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
+	}
 }
 
-// applies resources from $StateCacheDir/inv($State)/$TS_$RESKIND
-func restorefrom(status string) {
-
+// restorefrom applies resources from the YAML doc at:
+// $StateCacheDir/inv($State)/$TS_LAST
+func restorefrom(status, tsLast string) {
+	fmt.Printf("Restoring state from %v/%v", status, tsLast)
 }
 
-// switches over to context, as in `kubectl config use-context minikube`
+// use switches over to provided context as in:
+// `kubectl config use-context minikube`
 func use(context string) {
 	fmt.Printf("Switching over to context %v", context)
+}
+
+// showcfg prints the current config to screen
+func showcfg(clocal, cremote, namespace string) {
+	fmt.Println("--- STARTING SDX\n")
+	fmt.Printf("I'm using the following configuration:\n")
+	fmt.Printf("- local context: \x1b[34m%v\x1b[0m\n", clocal)
+	fmt.Printf("- remote context: \x1b[34m%v\x1b[0m\n", cremote)
+	fmt.Printf("- namespace to keep alive: \x1b[34m%v\x1b[0m\n", namespace)
+	fmt.Println("---\n")
 }
