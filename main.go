@@ -31,8 +31,10 @@ func main() {
 	// the endpoint we're using to check if we're online or offline
 	// TODO(mhausenblas): change to API server address or make it configurable?
 	probeURL := "http://www.google.com"
-	// the status of the connection, can be StatusXXX
+	// connection status channel, allowed values are StatusXXX
 	constat := make(chan string)
+	// the current and previous status
+	var status, prevstatus string
 
 	flag.Parse()
 
@@ -53,21 +55,33 @@ func main() {
 			time.Sleep(CheckConnectionDelaySeconds * time.Second)
 		}
 	}()
+	// the main control loop:
 	for {
-		// read in status from connection detector
-		status := <-constat
-		syncNReconcile(status, *namespace)
+		// read in status from connection detector:
+		status = <-constat
+		// sync state and reconcile, if necessary:
+		syncNReconcile(status, prevstatus, *namespace)
+		prevstatus = status
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
 	}
 }
 
-func syncNReconcile(status, namespace string) {
+// syncNReconcile syncs the state, reconciles (applies to new environment),
+// and switch over to it, IFF there was a change in the status, that is,
+// ONLINE -> OFFLINE or other way round.
+func syncNReconcile(status, prevstatus, namespace string) {
+	// only attempt to sync and reconcile if anything has changed:
+	if status == prevstatus {
+		return
+	}
+	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch over to local env\n", status)
-		checkLocal()
-
+		ensurelocal()
+		restore()
+		selectcontext()
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
 		r, err := kubectl(true, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
@@ -96,7 +110,17 @@ func dump(reskind, yamlblob string) error {
 	return err
 }
 
-func checkLocal() {
-	// check if Minikube or Minishift is running
-	// if not running, launch it
+// checks if Minikube or Minishift is running and if not, launches it
+func ensurelocal() {
+
+}
+
+// applies resources from $StateCacheDir/inv($State)/$TS_$RESKIND
+func restore() {
+
+}
+
+// switches over to local context, like `kubectl config use-context minikube`
+func selectcontext() {
+
 }
