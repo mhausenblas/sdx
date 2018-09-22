@@ -71,6 +71,8 @@ func main() {
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
 func syncNReconcile(status, prevstatus, namespace string) {
+	withstderr := true
+	verbose := false
 	// only attempt to sync and reconcile if anything has changed:
 	if status == prevstatus {
 		return
@@ -84,7 +86,7 @@ func syncNReconcile(status, prevstatus, namespace string) {
 		selectcontext()
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, will sync state and switch over to remote env\n", status)
-		r, err := kubectl(true, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
+		r, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
 		if err != nil {
 			fmt.Printf("Can't cuddle the cluster due to %v\n", err)
 			return
@@ -105,7 +107,7 @@ func dump(reskind, yamlblob string) error {
 		os.Mkdir(StateCacheDir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(StateCacheDir, fmt.Sprintf("%v_%v", ts, context))
+	fn := filepath.Join(StateCacheDir, fmt.Sprintf("%v_%v", ts, reskind))
 	err := ioutil.WriteFile(fn, []byte(yamlblob), 0644)
 	return err
 }

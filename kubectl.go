@@ -9,24 +9,27 @@ import (
 )
 
 // executes an 'kubectl xxx' command and returns the literal result
-func kubectl(withstderr bool, cmd string, args ...string) (string, error) {
-	bin, err := shellout(withstderr, "which", "kubectl")
+func kubectl(withstderr, verbose bool, cmd string, args ...string) (string, error) {
+	bin, err := shellout(withstderr, false, "which", "kubectl")
 	if err != nil {
 		return "", err
 	}
 	all := append([]string{cmd}, args...)
-	result, err := shellout(withstderr, bin, all...)
+	result, err := shellout(withstderr, verbose, bin, all...)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
 		return "", err
 	}
 	return result, nil
 }
 
 // shells out to execute a command and returns the literal result
-func shellout(withstderr bool, cmd string, args ...string) (string, error) {
+func shellout(withstderr, verbose bool, cmd string, args ...string) (string, error) {
 	result := ""
 	var out bytes.Buffer
-	fmt.Printf("%v\n", cmd+" "+strings.Join(args, " "))
+	if verbose {
+		fmt.Printf("%v\n", cmd+" "+strings.Join(args, " "))
+	}
 	c := exec.Command(cmd, args...)
 	c.Env = os.Environ()
 	if withstderr {
@@ -35,7 +38,8 @@ func shellout(withstderr bool, cmd string, args ...string) (string, error) {
 	c.Stdout = &out
 	err := c.Run()
 	if err != nil {
-		return result, err
+		fmt.Fprintf(os.Stderr, "%v", err)
+		return "", err
 	}
 	result = strings.TrimSpace(out.String())
 	return result, nil
