@@ -58,17 +58,10 @@ func ensure(status, clocal, cremote string) error {
 }
 
 // restorefrom applies resources from the YAML doc at:
-// $StateCacheDir/inv($State)/$TS_LAST
+// $StateCacheDir/$state/$timestamp_of_last_state_dump
 func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 	fmt.Printf("Restoring state from %v/%v\n", state, tsLast)
-	var invstate string
-	switch state {
-	case StatusOffline:
-		invstate = StatusOnline
-	case StatusOnline:
-		invstate = StatusOffline
-	}
-	statefile := filepath.Join(StateCacheDir, invstate, tsLast+".yaml")
+	statefile := filepath.Join(StateCacheDir, state, tsLast+".yaml")
 	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
