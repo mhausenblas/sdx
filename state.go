@@ -34,7 +34,7 @@ func dump(status, yamldoc string) (string, error) {
 		os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(targetdir, fmt.Sprintf("%v", ts))
+	fn := filepath.Join(targetdir, fmt.Sprintf("%v.yaml", ts))
 	err := ioutil.WriteFile(fn, []byte(yamldoc), 0644)
 	if err != nil {
 		return "", err
@@ -68,7 +68,7 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 	case StatusOnline:
 		invstate = StatusOffline
 	}
-	statefile := filepath.Join(StateCacheDir, invstate, tsLast)
+	statefile := filepath.Join(StateCacheDir, invstate, tsLast+".yaml")
 	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
