@@ -50,11 +50,16 @@ func main() {
 		fmt.Println("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n")
 		contexts, err := kubectl(false, false, "config", "get-contexts")
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 			os.Exit(1)
 		}
 		fmt.Println(contexts)
 		os.Exit(2)
+	}
+	err := use(false, false, *cremote)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		os.Exit(1)
 	}
 	showcfg(*clocal, *cremote, *namespace)
 	// the connection detector, simply tries to do an HTTP GET against probeURL
