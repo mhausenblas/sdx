@@ -16,13 +16,11 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	// or offline (local) subdirectory:
 	namespacestate, err := capture(withstderr, verbose, namespace)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't capture namespace state due to %v\n", err)
-		return ""
+		_, _ = fmt.Fprintf(os.Stderr, "Can't capture namespace state due to %v\n", err)
 	}
 	tsLatest, err = dump(status, namespacestate)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't dump namespace state due to %v\n", err)
-		return ""
+		_, _ = fmt.Fprintf(os.Stderr, "Can't dump namespace state due to %v\n", err)
 	}
 	// only attempt to reconcile if anything has changed:
 	if status == prevstatus {

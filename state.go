@@ -71,7 +71,7 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 	statefile := filepath.Join(StateCacheDir, invstate, tsLast)
 	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 	}
 	return err
 }
@@ -82,7 +82,7 @@ func use(withstderr, verbose bool, context string) error {
 	fmt.Printf("Switching over to context %v\n", context)
 	_, err := kubectl(withstderr, verbose, "config", "use-context", context)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 	}
 	return err
 }
