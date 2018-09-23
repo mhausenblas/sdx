@@ -17,7 +17,7 @@ func kubectl(withstderr, verbose bool, cmd string, args ...string) (string, erro
 	all := append([]string{cmd}, args...)
 	result, err := shellout(withstderr, verbose, bin, all...)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return "", err
 	}
 	return result, nil
@@ -38,7 +38,7 @@ func shellout(withstderr, verbose bool, cmd string, args ...string) (string, err
 	c.Stdout = &out
 	err := c.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return "", err
 	}
 	result = strings.TrimSpace(out.String())
