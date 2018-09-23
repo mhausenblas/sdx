@@ -12,12 +12,14 @@ import (
 // the state of deployments and services as a YAML doc
 func capture(withstderr, verbose bool, namespace string) (string, error) {
 	yamldoc := "---"
-	deploys, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "deployments", "--export", "--output=yaml")
+	deploys, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace,
+		"deployments", "--output=yaml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 		return "", err
 	}
-	svcs, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, "services", "--export", "--output=yaml")
+	svcs, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace,
+		"services", "--output=yaml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 		return "", err
