@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -31,8 +33,8 @@ func main() {
 	// the remote context to use
 	cremote := flag.String("remote", "", "the remote context you want me to use")
 	// the endpoint we're using to check if we're online or offline
-	// TODO(mhausenblas): change to API server address or make it configurable?
-	probeURL := "http://www.google.com"
+	// which is by default the API server address from the remote context
+	var probeURL string
 	// connection status channel, allowed values are StatusXXX
 	// this is us used between connection detector and main control loop
 	// to communicate the current status
@@ -67,6 +69,12 @@ func main() {
 	// some network issues prevents us from doing the GET and we are likely offline.
 	go func() {
 		for {
+			probeURL, err = kubectl(false, false, "config", "view",
+				"--output=jsonpath='{.clusters[?(@.name == \""+serverfromcontext(*cremote)+"\")]..server}'")
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+				os.Exit(1)
+			}
 			client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 			resp, err := client.Get(probeURL)
 			if err != nil {
@@ -105,4 +113,16 @@ func showcfg(clocal, cremote, namespace string) {
 	fmt.Printf("- remote context: \x1b[34m%v\x1b[0m\n", cremote)
 	fmt.Printf("- namespace to keep alive: \x1b[34m%v\x1b[0m\n", namespace)
 	fmt.Println("---\n")
+}
+
+// serverfromcontext extracts the API server address (IP:PORT)
+// part from a context name (asssuming it is in the OpenShift format).
+func serverfromcontext(context string) string {
+	// In OpenShift, the context naming format is:
+	// $PROJECT/$APISERVER/$USER for example:
+	// mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+	re := regexp.MustCompile("(.*)/(.*)/(.*)")
+	apiserver := re.FindStringSubmatch(context)[2]
+	apiserver = strings.Replace(apiserver, "openshift-com", "openshift.com", -1)
+	return "https://" + apiserver
 }
