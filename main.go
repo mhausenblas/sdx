@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -69,12 +68,14 @@ func main() {
 	// some network issues prevents us from doing the GET and we are likely offline.
 	go func() {
 		for {
+			clustername := clusterfromcontext(*cremote)
 			probeURL, err = kubectl(false, false, "config", "view",
-				"--output=jsonpath='{.clusters[?(@.name == \""+serverfromcontext(*cremote)+"\")]..server}'")
+				"--output=jsonpath='{.clusters[?(@.name == \""+clustername+"\")]..server}'")
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
 				os.Exit(1)
 			}
+			fmt.Printf("Trying to probe URL %v\n", probeURL)
 			client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 			resp, err := client.Get(probeURL)
 			if err != nil {
@@ -115,14 +116,12 @@ func showcfg(clocal, cremote, namespace string) {
 	fmt.Println("---\n")
 }
 
-// serverfromcontext extracts the API server address (IP:PORT)
-// part from a context name (asssuming it is in the OpenShift format).
-func serverfromcontext(context string) string {
+// clusterfromcontext extracts the cluster name part from
+// a context name, asssuming it is in the OpenShift format.
+func clusterfromcontext(context string) string {
 	// In OpenShift, the context naming format is:
-	// $PROJECT/$APISERVER/$USER for example:
+	// $PROJECT/$CLUSTERNAME/$USER for example:
 	// mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 	re := regexp.MustCompile("(.*)/(.*)/(.*)")
-	apiserver := re.FindStringSubmatch(context)[2]
-	apiserver = strings.Replace(apiserver, "openshift-com", "openshift.com", -1)
-	return "https://" + apiserver
+	return re.FindStringSubmatch(context)[2]
 }
