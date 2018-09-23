@@ -24,7 +24,7 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	}
 	// only attempt to reconcile if anything has changed:
 	if status == prevstatus {
-		return ""
+		return tsLatest
 	}
 	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 	// and respectively switch context (also, make sure remote or local are available):
@@ -42,5 +42,5 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
-	return
+	return tsLatest
 }
