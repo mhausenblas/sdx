@@ -9,33 +9,35 @@ import (
 )
 
 const (
-	// representing the online state:
+	// StatusOnline signals we have access to the remote cluster:
 	StatusOnline = "ONLINE"
-	// representing the offline state:
+	// StatusOffline signals we do not have access to the remote cluster:
 	StatusOffline = "OFFLINE"
-	// how long to try to get a result when probing:
+	// ProbeTimeoutSeconds defines how long to try to get a result when probing:
 	ProbeTimeoutSeconds = 10
-	// how quick to check connection:
+	// CheckConnectionDelaySeconds defines how long to wait between two connection checks:
 	CheckConnectionDelaySeconds = 2
-	// how quick to sync reconcile state:
+	// SyncStateSeconds defines how long to wait between two reconcile rounds:
 	SyncStateSeconds = 2
-	// the directory to keep track of the state:
+	// StateCacheDir defines the directory to use to keep track of the local and remote state:
 	StateCacheDir = "/tmp/kube-sdx"
 )
 
 func main() {
-	// the namespace we're trying to keep alive:
-	namespace := flag.String("namespace", "default", "the namespace you want to keep alive")
+	// the namespace I'm trying to keep alive:
+	namespace := flag.String("namespace", "default", "the namespace you want me to keep alive")
 	// the local context to use
-	clocal := flag.String("local", "minikube", "the local context to use")
+	clocal := flag.String("local", "minikube", "the local context you want me to use")
 	// the remote context to use
-	cremote := flag.String("remote", "", "the remote context to use")
+	cremote := flag.String("remote", "", "the remote context you want me to use")
 	// the endpoint we're using to check if we're online or offline
 	// TODO(mhausenblas): change to API server address or make it configurable?
 	probeURL := "http://www.google.com"
 	// connection status channel, allowed values are StatusXXX
+	// this is us used between connection detector and main control loop
+	// to communicate the current status
 	constat := make(chan string)
-	// the current and previous status
+	// the current and previous status, respectively
 	var status, prevstatus string
 	// timestamp of most recent dump
 	var tsLatest string
@@ -44,11 +46,15 @@ func main() {
 
 	// make sure we have a remote context to work with:
 	if *cremote == "" {
-		fmt.Printf("\x1b[91mI'm sorry Dave, I'm afraid I can't do that.\n\x1b[0m")
-		fmt.Printf("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n\n")
-		contexts, _ := kubectl(false, false, "config", "get-contexts")
+		fmt.Println("\x1b[91mI'm sorry Dave, I'm afraid I can't do that.\x1b[0m")
+		fmt.Println("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n")
+		contexts, err := kubectl(false, false, "config", "get-contexts")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+			os.Exit(1)
+		}
 		fmt.Println(contexts)
-		os.Exit(1)
+		os.Exit(2)
 	}
 	showcfg(*clocal, *cremote, *namespace)
 	// the connection detector, simply tries to do an HTTP GET against probeURL
@@ -68,7 +74,7 @@ func main() {
 			time.Sleep(CheckConnectionDelaySeconds * time.Second)
 		}
 	}()
-	// the main control loop:
+	// the main control loop
 	for {
 		// read in status from connection detector:
 		status = <-constat
@@ -84,48 +90,6 @@ func main() {
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
 	}
-}
-
-// syncNReconcile syncs the state, reconciles (applies to new environment),
-// and switch over to it, IFF there was a change in the status, that is,
-// ONLINE -> OFFLINE or other way round.
-func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string) (tsLatest string) {
-	withstderr := true
-	verbose := false
-	// capture the current namespace state and dump it
-	// as one YAML file in the respective online (remote)
-	// or offline (local) subdirectory:
-	namespacestate, err := capture(withstderr, verbose, namespace)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't capture namespace state due to %v\n", err)
-		return ""
-	}
-	tsLatest, err = dump(status, namespacestate)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't dump namespace state due to %v\n", err)
-		return ""
-	}
-	// only attempt to reconcile if anything has changed:
-	if status == prevstatus {
-		return ""
-	}
-	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
-	// and respectively switch context (also, make sure remote or local are available):
-	switch status {
-	case StatusOffline:
-		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
-		ensure(status, clocal, cremote)
-		restorefrom(StatusOnline, tsLast)
-		use(withstderr, verbose, clocal)
-	case StatusOnline:
-		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
-		ensure(status, clocal, cremote)
-		restorefrom(StatusOffline, tsLast)
-		use(withstderr, verbose, cremote)
-	default:
-		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
-	}
-	return
 }
 
 // showcfg prints the current config to screen

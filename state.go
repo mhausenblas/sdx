@@ -45,7 +45,7 @@ func dump(status, yamldoc string) (string, error) {
 // ensure checks if, depending on the status, the remote or local
 // clusters are actually available (in case of local, launches it
 //  if this is not the case)
-func ensure(status, clocal, cremote string) {
+func ensure(status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
@@ -54,12 +54,26 @@ func ensure(status, clocal, cremote string) {
 		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
 		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
 	}
+	return nil
 }
 
 // restorefrom applies resources from the YAML doc at:
 // $StateCacheDir/inv($State)/$TS_LAST
-func restorefrom(status, tsLast string) {
-	fmt.Printf("Restoring state from %v/%v\n", status, tsLast)
+func restorefrom(withstderr, verbose bool, state, tsLast string) error {
+	fmt.Printf("Restoring state from %v/%v\n", state, tsLast)
+	var invstate string
+	switch state {
+	case StatusOffline:
+		invstate = StatusOnline
+	case StatusOnline:
+		invstate = StatusOffline
+	}
+	statefile := filepath.Join(StateCacheDir, invstate, tsLast)
+	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+	}
+	return err
 }
 
 // use switches over to provided context as in:
