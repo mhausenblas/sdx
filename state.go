@@ -15,13 +15,13 @@ func capture(withstderr, verbose bool, namespace string) (string, error) {
 	deploys, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace,
 		"deployments", "--output=yaml")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		displayerr("Can't cuddle the cluster", err)
 		return "", err
 	}
 	svcs, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace,
 		"services", "--output=yaml")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		displayerr("Can't cuddle the cluster", err)
 		return "", err
 	}
 	yamldoc = deploys + "---\n" + svcs
@@ -66,7 +66,7 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 	statefile := filepath.Join(StateCacheDir, state, tsLast+".yaml")
 	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		displayerr("Can't cuddle the cluster", err)
 	}
 	return err
 }
@@ -77,7 +77,7 @@ func use(withstderr, verbose bool, context string) error {
 	fmt.Printf("Switching over to context %v\n", context)
 	_, err := kubectl(withstderr, verbose, "config", "use-context", context)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		displayerr("Can't cuddle the cluster", err)
 	}
 	return err
 }

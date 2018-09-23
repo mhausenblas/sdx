@@ -52,7 +52,7 @@ func main() {
 		fmt.Println("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n")
 		contexts, err := kubectl(false, false, "config", "get-contexts")
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+			displayerr("Can't cuddle the cluster", err)
 			os.Exit(1)
 		}
 		fmt.Println(contexts)
@@ -60,7 +60,7 @@ func main() {
 	}
 	err := use(false, false, *cremote)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+		displayerr("Can't cuddle the cluster", err)
 		os.Exit(1)
 	}
 	showcfg(*clocal, *cremote, *namespace)
@@ -73,7 +73,7 @@ func main() {
 			probeURL, err = kubectl(false, false, "config", "view",
 				"--output=jsonpath='{.clusters[?(@.name == \""+clustername+"\")]..server}'")
 			if err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+				displayerr("Can't cuddle the cluster", err)
 				os.Exit(1)
 			}
 			probeURL = strings.Trim(probeURL, "'")
@@ -126,4 +126,9 @@ func clusterfromcontext(context string) string {
 	// mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 	re := regexp.MustCompile("(.*)/(.*)/(.*)")
 	return re.FindStringSubmatch(context)[2]
+}
+
+// displayerr write message and error out to stderr
+func displayerr(msg string, err error) {
+	_, _ = fmt.Fprintf(os.Stderr, "%v: \x1b[91m%v\x1b[0m\n", msg, err)
 }
