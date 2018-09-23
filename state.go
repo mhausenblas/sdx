@@ -49,8 +49,10 @@ func ensure(status, clocal, cremote string) {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
+		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
 	case StatusOnline:
 		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
+		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
 	}
 }
 
@@ -62,6 +64,11 @@ func restorefrom(status, tsLast string) {
 
 // use switches over to provided context as in:
 // `kubectl config use-context minikube`
-func use(context string) {
+func use(withstderr, verbose bool, context string) error {
 	fmt.Printf("Switching over to context %v\n", context)
+	_, err := kubectl(withstderr, verbose, "get", "config", "use-context", context)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Can't cuddle the cluster due to %v\n", err)
+	}
+	return err
 }

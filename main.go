@@ -116,12 +116,12 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
 		ensure(status, clocal, cremote)
 		restorefrom(StatusOnline, tsLast)
-		use(clocal)
+		use(withstderr, verbose, clocal)
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
 		ensure(status, clocal, cremote)
 		restorefrom(StatusOffline, tsLast)
-		use(cremote)
+		use(withstderr, verbose, cremote)
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
