@@ -77,7 +77,7 @@ func main() {
 				os.Exit(1)
 			}
 			probeURL = strings.Trim(probeURL, "'")
-			fmt.Printf("Trying to probe URL %v\n", probeURL)
+			// fmt.Printf("Trying to probe URL %v\n", probeURL)
 			client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 			resp, err := client.Get(probeURL)
 			if err != nil {

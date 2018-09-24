@@ -1,1 +1,91 @@
 # Seamless Developer Experience
+
+This is a prototype of a command line tool called `kube-sdx` which enables you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. 
+
+## Prerequisits
+
+We assume you have `kubectl` (or OpenShift's `oc`) command line tool installed and configured as well as that you have a local cluster (Minikube, Minishift, Docker for Desktop) set up and at least one remote cluster configured. The tests have been carried out with the following configuration:
+
+```bash
+$ kubectl version --short
+Client Version: v1.11.3
+Server Version: v1.10.0
+
+$ minikube version
+minikube version: v0.28.2
+```
+
+## Install
+
+We support Linux, macOS, and Windows and you can download the binaries here:
+
+- Linux: [kube-sdx-linux]()
+- macOS: [kube-sdx-macos]()
+- Windows: [kube-sdx-windows]()
+
+Download the binary, rename it to `kube-sdx` and put it on your path, and finally make it executable (in *nix: `chmod +x kube-sdx`).
+
+## Use
+
+Once downloaded and set up, you can launch `kube-sdx` like so:
+
+```bash
+$ kube-sdx --remote=$WORK_CONTEXT
+```
+
+Note that `--remote` is the only parameter you must supply, otherwise `kube-sdx` doesn't know what to track (and snapshot) and hence can't function properly. But what happens if you leave it out? Simply this:
+
+```bash
+I'm sorry Dave, I'm afraid I can't do that.
+I need to know which remote context you want, pick one from below and provide it via the --remote parameter:
+
+CURRENT   NAME                                                      CLUSTER                               AUTHINFO                                       NAMESPACE
+          default/192-168-99-100:8443/developer                     192-168-99-100:8443                   developer/192-168-99-100:8443                  default
+          default/192-168-99-100:8443/system:admin                  192-168-99-100:8443                   system:admin/192-168-99-100:8443               default
+          docker-for-desktop                                        docker-for-desktop-cluster            docker-for-desktop
+          dok/api-pro-us-east-1-openshift-com:443/mhausenb          api-pro-us-east-1-openshift-com:443   mhausenb/api-pro-us-east-1-openshift-com:443   dok
+          mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb   api-pro-us-east-1-openshift-com:443   mhausenb/api-pro-us-east-1-openshift-com:443   mh9sandbox
+*         minikube                                                  minikube                              minikube
+
+```
+
+So, no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;)
+
+Let's have a look at a typical session, now:
+
+```bash
+$ kube-sdx \
+  --namespace=mh9sandbox \
+  --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+
+Switching over to context mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+--- STARTING SDX
+
+I'm using the following configuration:
+- local context: minikube
+- remote context: mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+- namespace to keep alive: mh9sandbox
+---
+
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in 200 OK
+Connection detection [OFFLINE], probe resulted in Get https://api.pro-us-east-1.openshift.com:443: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+...
+```
+
+## How it works
+
+In a nutshell, `kube-sdx` keeps an eye on the API server of the configured remote cluster (via a simple HTTP `GET`) and if the connection detection fails, assumes you're offline. Once in offline mode, `kube-sdx` switches over to the local cluster and you can continue your work there. In the background, `kube-sdx` takes regular snapshots of certain key resources such as deployments or services and stores them in YAML docs that get applied to the respective environment, when a switch occurs.
+
+**Local development** If you want to play around with `kube-sdx` or extend it, here's what's needed:
+
+```bash
+$ go version
+go version go1.10 darwin/amd64
+
+$ go build -o kube-sdx && \
+             ./kube-sdx \
+              --namespace=mh9sandbox \
+              --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+```
+
+Above command will build the latest version, creating a binary called `kube-sdx and execute it with the no `local` env defined (hence going with the default `minikube`), keeping the namespace `mh9sandbox` alive (default: `default`) and uses as the `remote` a context that specifies a project in OpenShift Online.
