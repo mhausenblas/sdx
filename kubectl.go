@@ -10,12 +10,15 @@ import (
 
 // executes an 'kubectl xxx' command and returns the literal result
 func kubectl(withstderr, verbose bool, cmd string, args ...string) (string, error) {
-	bin, err := shellout(withstderr, false, "which", "kubectl")
-	if err != nil {
-		return "", err
+	if kubectlbin == "" {
+		bin, err := shellout(withstderr, false, "which", "kubectl")
+		if err != nil {
+			return "", err
+		}
+		kubectlbin = bin
 	}
 	all := append([]string{cmd}, args...)
-	result, err := shellout(withstderr, verbose, bin, all...)
+	result, err := shellout(withstderr, verbose, kubectlbin, all...)
 	if err != nil {
 		if verbose {
 			fmt.Fprintf(os.Stderr, "%v\n", err)

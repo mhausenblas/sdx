@@ -25,6 +25,10 @@ const (
 	StateCacheDir = "/tmp/kube-sdx"
 )
 
+var (
+	kubectlbin string
+)
+
 func main() {
 	// the namespace I'm trying to keep alive:
 	namespace := flag.String("namespace", "default", "the namespace you want me to keep alive")
@@ -45,6 +49,10 @@ func main() {
 	var tsLatest string
 
 	flag.Parse()
+
+	if kb := os.Getenv("SDX_KUBECTL_BIN"); kb != "" {
+		kubectlbin = kb
+	}
 
 	// make sure we have a remote context to work with:
 	if *cremote == "" {
