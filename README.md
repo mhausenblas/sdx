@@ -2,6 +2,14 @@
 
 This is a prototype of a command line tool called `kube-sdx` (seamless DX) which enables you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. 
 
+![screen shot of kube-sdx](img/kube-sdx-screen-shot.png)
+
+- [Prerequisits](#prerequisits)
+- [Install](#install)
+- [Use](#use)
+- [Platform-specific notes](#platform-specific-notes)
+- [How it works](#how-it-works)
+
 ## Prerequisits
 
 We assume you have `kubectl` (or OpenShift's `oc`) command line tool installed and configured as well as that you have a local cluster (Minikube, Minishift, Docker for Desktop) set up and at least one remote cluster configured. The tests have been carried out with the following configuration:
@@ -36,6 +44,7 @@ $ kube-sdx --remote=$WORK_CONTEXT
 Note that `--remote` is the only parameter you must supply, otherwise `kube-sdx` doesn't know what to track (and snapshot) and hence can't function properly. But what happens if you leave it out? Simply this:
 
 ```bash
+$ kube-sdx
 I'm sorry Dave, I'm afraid I can't do that.
 I need to know which remote context you want, pick one from below and provide it via the --remote parameter:
 
@@ -49,7 +58,7 @@ CURRENT   NAME                                                      CLUSTER     
 
 ```
 
-So, no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;)
+So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;)
 
 Let's have a look at a typical session, now:
 
@@ -80,7 +89,7 @@ Under Windows, you *must* specify the `SDX_KUBECTL_BIN` environment variable, si
 
 In a nutshell, `kube-sdx` keeps an eye on the API server of the configured remote cluster (via a simple HTTP `GET`) and if the connection detection fails, assumes you're offline. Once in offline mode, `kube-sdx` switches over to the local cluster and you can continue your work there. In the background, `kube-sdx` takes regular snapshots of certain key resources such as deployments or services and stores them in YAML docs that get applied to the respective environment, when a switch occurs.
 
-**Local development** If you want to play around with `kube-sdx` or extend it, here's what's needed:
+**Local development.** If you want to play around with `kube-sdx` or extend it, here's what's needed:
 
 ```bash
 $ go version
@@ -88,8 +97,8 @@ go version go1.10 darwin/amd64
 
 $ go build -o kube-sdx && \
              ./kube-sdx \
-              --namespace=mh9sandbox \
-              --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+             --namespace=mh9sandbox \
+             --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 ```
 
-Above command will build the latest version, creating a binary called `kube-sdx and execute it with the no `local` env defined (hence going with the default `minikube`), keeping the namespace `mh9sandbox` alive (default: `default`) and uses as the `remote` a context that specifies a project in OpenShift Online.
+Above command will build the latest version, creating a binary called `kube-sdx` and execute it with the no `local` env defined (hence going with the default `minikube`), keeping the namespace `mh9sandbox` alive (default: `default`) and uses as the `remote` a context that specifies a project in OpenShift Online.
