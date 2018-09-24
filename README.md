@@ -1,6 +1,6 @@
 # Seamless Developer Experience
 
-This is a prototype of a command line tool called `kube-sdx` which enables you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. 
+This is a prototype of a command line tool called `kube-sdx` (seamless DX) which enables you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. 
 
 ## Prerequisits
 
@@ -71,6 +71,10 @@ Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443
 Connection detection [OFFLINE], probe resulted in Get https://api.pro-us-east-1.openshift.com:443: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 ...
 ```
+
+## Platform-specific notes
+
+Under Windows, you *must* specify the `SDX_KUBECTL_BIN` environment variable, since auto-discovery doesn't work there. Also, if you are using an OpenShift remote cluster, you typically want to set `SDX_KUBECTL_BIN` to `$(which oc)`.
 
 ## How it works
 
