@@ -26,6 +26,8 @@ const (
 )
 
 var (
+	// what binary to use to speak with the API Server
+	// defaults to $(which kubectl)
 	kubectlbin string
 )
 
