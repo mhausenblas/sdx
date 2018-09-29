@@ -8,6 +8,21 @@ import (
 	"time"
 )
 
+// ensure checks if, depending on the status, the remote or local
+// clusters are actually available (in case of local, launches it
+//  if this is not the case)
+func ensure(status, clocal, cremote string) error {
+	switch status {
+	case StatusOffline:
+		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
+		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
+	case StatusOnline:
+		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
+		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
+	}
+	return nil
+}
+
 // capture queries the current state in the active namespace by exporting
 // the state of deployments and services as a YAML doc
 func capture(withstderr, verbose bool, namespace string) (string, error) {
@@ -36,7 +51,7 @@ func dump(status, yamldoc string) (string, error) {
 		os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(targetdir, fmt.Sprintf("%v.yaml", ts))
+	fn := filepath.Join(targetdir, "latest.yaml")
 	err := ioutil.WriteFile(fn, []byte(yamldoc), 0644)
 	if err != nil {
 		return "", err
@@ -44,26 +59,11 @@ func dump(status, yamldoc string) (string, error) {
 	return fmt.Sprintf("%v", ts), nil
 }
 
-// ensure checks if, depending on the status, the remote or local
-// clusters are actually available (in case of local, launches it
-//  if this is not the case)
-func ensure(status, clocal, cremote string) error {
-	switch status {
-	case StatusOffline:
-		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
-		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
-	case StatusOnline:
-		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
-		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
-	}
-	return nil
-}
-
 // restorefrom applies resources from the YAML doc at:
 // $StateCacheDir/$state/$timestamp_of_last_state_dump
 func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 	fmt.Printf("Restoring state from %v/%v\n", state, tsLast)
-	statefile := filepath.Join(StateCacheDir, state, tsLast+".yaml")
+	statefile := filepath.Join(StateCacheDir, state, "latest.yaml")
 	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
