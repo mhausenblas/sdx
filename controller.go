@@ -25,8 +25,13 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	if status == prevstatus {
 		return tsLatest
 	}
-	// check which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
-	// and respectively switch context (also, make sure remote or local are available):
+	cases(status, clocal, cremote, tsLast, withstderr, verbose)
+	return tsLatest
+}
+
+// cases checks which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
+// and respectively switches the context. It also makes sure remote or local are available.
+func cases(status, clocal, cremote, tsLast string, withstderr, verbose bool) {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
@@ -41,5 +46,4 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
-	return tsLatest
 }
