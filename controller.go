@@ -10,6 +10,9 @@ import (
 // ONLINE -> OFFLINE or other way round.
 func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string, verbose bool) (tsLatest string) {
 	withstderr := true
+	if status == prevstatus {
+		return tsLast
+	}
 	// check which case we're dealing with and act accordingly:
 	cases(status, prevstatus, clocal, cremote, tsLast, withstderr, verbose)
 	// capture the current namespace state and dump it:
@@ -31,15 +34,11 @@ func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbo
 	case StatusOffline:
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
-		if status == prevstatus {
-			_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
-		}
+		_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 	case StatusOnline:
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
-		if status == prevstatus {
-			_ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
-		}
+		_ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
