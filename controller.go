@@ -29,14 +29,12 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbose bool) {
 	switch status {
 	case StatusOffline:
-		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
 		if status == prevstatus {
 			_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 		}
 	case StatusOnline:
-		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
 		if status == prevstatus {

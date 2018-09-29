@@ -21,6 +21,7 @@ func observeconnection(cremote, clocal string, constat chan string) {
 		resp, err := client.Get(probeURL)
 		if err != nil {
 			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in %v\x1b[0m\n", StatusOffline, err)
+			ccurrent = clocal
 			constat <- StatusOffline
 			continue
 		}

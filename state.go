@@ -62,11 +62,20 @@ func dump(status, yamldoc string) (string, error) {
 // restorefrom applies resources from the YAML doc at:
 // $StateCacheDir/$state/$timestamp_of_last_state_dump
 func restorefrom(withstderr, verbose bool, state, tsLast string) error {
-	fmt.Printf("Restoring state from %v/%v\n", state, tsLast)
+	var err error
 	statefile := filepath.Join(StateCacheDir, state, "latest.yaml")
-	_, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
-	if err != nil {
-		displayerr("Can't cuddle the cluster", err)
+	if verbose {
+		fmt.Printf("Trying to restore state from %v/latest.yaml@%v\n", state, tsLast)
+	}
+	if _, err = os.Stat(statefile); !os.IsNotExist(err) {
+		res, err := kubectl(withstderr, verbose, "apply", "--filename="+statefile)
+		if err != nil {
+			displayerr("Can't cuddle the cluster", err)
+			return err
+		}
+		if verbose {
+			fmt.Printf("Successfully restored state:\n%v\n", res)
+		}
 	}
 	return err
 }
