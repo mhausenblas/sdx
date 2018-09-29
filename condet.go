@@ -43,12 +43,18 @@ func getAPIServerURL(kubectx string) string {
 	return probeURL
 }
 
-// clusterfromcontext extracts the cluster name part from
-// a context name, asssuming it is in the OpenShift format.
-func clusterfromcontext(context string) string {
-	// In OpenShift, the context naming format is:
-	// $PROJECT/$CLUSTERNAME/$USER for example:
-	// mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
-	re := regexp.MustCompile("(.*)/(.*)/(.*)")
-	return re.FindStringSubmatch(context)[2]
+// clusterfromcontext extracts the cluster name part from kubectx,
+// asssuming it is in the OpenShift format or otherwise assume flat cluster name.
+func clusterfromcontext(kubectx string) string {
+	switch {
+	case strings.Contains(kubectx, "/"):
+		// In OpenShift, the context naming format is:
+		//  $PROJECT/$CLUSTERNAME/$USER
+		// For example:
+		//  mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+		re := regexp.MustCompile("(.*)/(.*)/(.*)")
+		return re.FindStringSubmatch(kubectx)[2]
+	default:
+		return kubectx
+	}
 }
