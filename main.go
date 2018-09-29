@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 	"time"
 )
 
@@ -65,15 +64,16 @@ func main() {
 		fmt.Println(contexts)
 		os.Exit(2)
 	}
+	// launch the connection detector:
+	go observeconnection(*cremote, *clocal, constat)
+	// display config in use:
+	showcfg(*clocal, *cremote, *namespace)
+	// apply defaults:
 	err := use(false, false, *cremote)
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
 		os.Exit(1)
 	}
-	// display config in use:
-	showcfg(*clocal, *cremote, *namespace)
-	// the connection detector:
-	go observeconnection(*cremote, constat)
 	// the main control loop:
 	for {
 		// read in status from connection detector:
@@ -100,16 +100,6 @@ func showcfg(clocal, cremote, namespace string) {
 	fmt.Printf("- remote context: \x1b[34m%v\x1b[0m\n", cremote)
 	fmt.Printf("- namespace to keep alive: \x1b[34m%v\x1b[0m\n", namespace)
 	fmt.Println("---\n")
-}
-
-// clusterfromcontext extracts the cluster name part from
-// a context name, asssuming it is in the OpenShift format.
-func clusterfromcontext(context string) string {
-	// In OpenShift, the context naming format is:
-	// $PROJECT/$CLUSTERNAME/$USER for example:
-	// mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
-	re := regexp.MustCompile("(.*)/(.*)/(.*)")
-	return re.FindStringSubmatch(context)[2]
 }
 
 // displayerr write message and error out to stderr

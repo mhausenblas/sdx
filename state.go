@@ -74,10 +74,10 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) error {
 // use switches over to provided context as in:
 // `kubectl config use-context minikube`
 func use(withstderr, verbose bool, context string) error {
-	fmt.Printf("Switching over to context %v\n", context)
 	_, err := kubectl(withstderr, verbose, "config", "use-context", context)
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
 	}
+	fmt.Printf("Now using context %v\n", context)
 	return err
 }
