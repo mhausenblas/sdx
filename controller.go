@@ -10,9 +10,9 @@ import (
 // ONLINE -> OFFLINE or other way round.
 func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string, verbose bool) (tsLatest string) {
 	withstderr := true
-	// capture the current namespace state and dump it
-	// as one YAML file in the respective online (remote)
-	// or offline (local) subdirectory:
+	// check which case we're dealing with and act accordingly:
+	cases(status, prevstatus, clocal, cremote, tsLast, withstderr, verbose)
+	// capture the current namespace state and dump it:
 	namespacestate, err := capture(withstderr, verbose, namespace)
 	if err != nil {
 		displayerr("Can't capture namespace state", err)
@@ -21,28 +21,27 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	if err != nil {
 		displayerr("Can't dump namespace state", err)
 	}
-	// only attempt to reconcile if anything has changed:
-	if status == prevstatus {
-		return tsLatest
-	}
-	cases(status, clocal, cremote, tsLast, withstderr, verbose)
 	return tsLatest
 }
 
 // cases checks which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 // and respectively switches the context. It also makes sure remote or local are available.
-func cases(status, clocal, cremote, tsLast string, withstderr, verbose bool) {
+func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbose bool) {
 	switch status {
 	case StatusOffline:
 		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
-		_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
+		if status != prevstatus {
+			_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
+		}
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
-		_ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
+		if status != prevstatus {
+			_ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
