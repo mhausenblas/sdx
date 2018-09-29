@@ -24,16 +24,9 @@ $ kube-sdx \
   --namespace=mh9sandbox \
   --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 
-Switching over to context mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
---- STARTING SDX
 
-I'm using the following configuration:
-- local context: minikube
-- remote context: mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
-- namespace to keep alive: mh9sandbox
----
-
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in 200 OK
-Connection detection [OFFLINE], probe resulted in Get https://api.pro-us-east-1.openshift.com:443: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
-...
 ```
+
+Note that messages in yellow are from the connection detection module, running concurrently to the backup and restore module.
+
+Especially when you use `--verbose` you'll also see messages in blue, coming from the low-level shelling out module, effectively showing which `kubectl` commands have been issued.
