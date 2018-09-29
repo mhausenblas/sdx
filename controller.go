@@ -32,14 +32,14 @@ func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbo
 		fmt.Printf("Seems I'm %v, will try to switch to local context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
-		if status != prevstatus {
+		if status == prevstatus {
 			_ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 		}
 	case StatusOnline:
 		fmt.Printf("Seems I'm %v, switching over to remote context\n", status)
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
-		if status != prevstatus {
+		if status == prevstatus {
 			_ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 		}
 	default:
