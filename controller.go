@@ -32,16 +32,15 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 // and respectively switches the context. It also makes sure remote or local are available.
 func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbose bool) {
 	var res string
-	var err error
 	switch status {
 	case StatusOffline:
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
-		res, err = restorefrom(withstderr, verbose, StatusOnline, tsLast)
+		res, _ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 	case StatusOnline:
 		_ = ensure(status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
-		res, err = restorefrom(withstderr, verbose, StatusOffline, tsLast)
+		res, _ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
