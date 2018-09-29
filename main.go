@@ -36,6 +36,8 @@ func main() {
 	clocal := flag.String("local", "minikube", "the local context you want me to use")
 	// the remote context to use
 	cremote := flag.String("remote", "", "the remote context you want me to use")
+	// log level
+	verbose := flag.Bool("verbose", false, "if set to true, I'll show you all the nitty gritty details")
 	// the endpoint we're using to check if we're online or offline
 	// which is by default the API server address from the remote context
 	var probeURL string
@@ -106,7 +108,7 @@ func main() {
 			prevstatus = status
 		}
 		// sync state and reconcile, if necessary:
-		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest)
+		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest, *verbose)
 		if tsl != "" {
 			tsLatest = tsl
 		}

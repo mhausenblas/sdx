@@ -8,9 +8,8 @@ import (
 // syncNReconcile syncs the state, reconciles (applies to new environment),
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
-func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string) (tsLatest string) {
+func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string, verbose bool) (tsLatest string) {
 	withstderr := true
-	verbose := false
 	// capture the current namespace state and dump it
 	// as one YAML file in the respective online (remote)
 	// or offline (local) subdirectory:
