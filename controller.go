@@ -10,11 +10,6 @@ import (
 // ONLINE -> OFFLINE or other way round.
 func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast string, verbose bool) (tsLatest string) {
 	withstderr := true
-	if status == prevstatus {
-		return tsLast
-	}
-	// check which case we're dealing with and act accordingly:
-	cases(status, prevstatus, clocal, cremote, tsLast, withstderr, verbose)
 	// capture the current namespace state and dump it:
 	namespacestate, err := capture(withstderr, verbose, namespace)
 	if err != nil {
@@ -24,6 +19,12 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast strin
 	if err != nil {
 		displayerr("Can't dump namespace state", err)
 	}
+	// if nothing changed since previous check, we're done
+	if status == prevstatus {
+		return tsLast
+	}
+	// if something changed since previous check, deal with it accordingly:
+	cases(status, prevstatus, clocal, cremote, tsLast, withstderr, verbose)
 	return tsLatest
 }
 

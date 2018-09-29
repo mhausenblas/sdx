@@ -68,12 +68,9 @@ func main() {
 	go observeconnection(*cremote, *clocal, constat)
 	// display config in use:
 	showcfg(*clocal, *cremote, *namespace)
-	// apply defaults:
-	err := use(false, false, *cremote)
-	if err != nil {
-		displayerr("Can't cuddle the cluster", err)
-		os.Exit(1)
-	}
+	// make sure the initial status is set correctly:
+	status = <-constat
+	initialstate(status, *clocal, *cremote)
 	// the main control loop:
 	for {
 		// read in status from connection detector:
@@ -89,6 +86,21 @@ func main() {
 		prevstatus = status
 		// wait for next round of sync & reconciliation:
 		time.Sleep(SyncStateSeconds * time.Second)
+	}
+}
+
+func initialstate(status, clocal, cremote string) {
+	cinit := ""
+	switch status {
+	case StatusOffline:
+		cinit = clocal
+	case StatusOnline:
+		cinit = cremote
+	}
+	err := use(false, false, cinit)
+	if err != nil {
+		displayerr("Can't cuddle the cluster", err)
+		os.Exit(1)
 	}
 }
 
