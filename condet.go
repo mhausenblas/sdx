@@ -20,12 +20,12 @@ func observeconnection(cremote, clocal string, constat chan string) {
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
 		if err != nil {
-			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in %v\x1b[0m\n", StatusOffline, err)
+			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in:\n%v\x1b[0m\n", StatusOffline, err)
 			ccurrent = clocal
 			constat <- StatusOffline
 			continue
 		}
-		fmt.Printf("\x1b[93mConnection detection [%v], probe %v resulted in %v\x1b[0m\n", StatusOnline, probeURL, resp.Status)
+		fmt.Printf("\x1b[93mConnection detection [%v], probe %v resulted in:\n%v\x1b[0m\n", StatusOnline, probeURL, resp.Status)
 		constat <- StatusOnline
 		time.Sleep(CheckConnectionDelaySeconds * time.Second)
 	}

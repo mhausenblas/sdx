@@ -44,7 +44,7 @@ func main() {
 	// the current and previous status, respectively
 	var status, prevstatus string
 	// timestamp of most recent dump
-	var tsLatest string
+	tsLatest := "0"
 
 	flag.Parse()
 

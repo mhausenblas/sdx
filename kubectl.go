@@ -21,7 +21,7 @@ func kubectl(withstderr, verbose bool, cmd string, args ...string) (string, erro
 	result, err := shellout(withstderr, verbose, kubectlbin, all...)
 	if err != nil {
 		if verbose {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+			displayerr("Can't execute kubectl command", err)
 		}
 		return "", err
 	}
@@ -33,7 +33,7 @@ func shellout(withstderr, verbose bool, cmd string, args ...string) (string, err
 	result := ""
 	var out bytes.Buffer
 	if verbose {
-		fmt.Printf("%v\n", cmd+" "+strings.Join(args, " "))
+		fmt.Printf("\x1b[94m%v\n", cmd+" "+strings.Join(args, " ")+"\x1b[0m")
 	}
 	c := exec.Command(cmd, args...)
 	c.Env = os.Environ()
@@ -44,7 +44,7 @@ func shellout(withstderr, verbose bool, cmd string, args ...string) (string, err
 	err := c.Run()
 	if err != nil {
 		if verbose {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+			displayerr("Can't shell out", err)
 		}
 		return "", err
 	}
