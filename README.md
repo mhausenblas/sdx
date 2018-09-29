@@ -60,26 +60,7 @@ CURRENT   NAME                                                      CLUSTER     
 
 So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;)
 
-Let's have a look at a typical session, now:
-
-```bash
-$ kube-sdx \
-  --namespace=mh9sandbox \
-  --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
-
-Switching over to context mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
---- STARTING SDX
-
-I'm using the following configuration:
-- local context: minikube
-- remote context: mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
-- namespace to keep alive: mh9sandbox
----
-
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in 200 OK
-Connection detection [OFFLINE], probe resulted in Get https://api.pro-us-east-1.openshift.com:443: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
-...
-```
+NOTE: If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
 
 ## Platform-specific notes
 
