@@ -48,7 +48,7 @@ func capture(withstderr, verbose bool, namespace string) (string, error) {
 func dump(status, yamldoc string) (string, error) {
 	targetdir := filepath.Join(StateCacheDir, status)
 	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
-		os.Mkdir(targetdir, os.ModePerm)
+		_ = os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
 	fn := filepath.Join(targetdir, "latest.yaml")

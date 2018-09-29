@@ -21,7 +21,7 @@ func kubectl(withstderr, verbose bool, cmd string, args ...string) (string, erro
 	result, err := shellout(withstderr, verbose, kubectlbin, all...)
 	if err != nil {
 		if verbose {
-			displayerr("Can't execute kubectl command", err)
+			displayerr("Something went wrong when executing kubectl command", err)
 		}
 		return "", err
 	}
@@ -44,7 +44,7 @@ func shellout(withstderr, verbose bool, cmd string, args ...string) (string, err
 	err := c.Run()
 	if err != nil {
 		if verbose {
-			displayerr("Can't shell out", err)
+			displayerr("Something went wrong when shelling out", err)
 		}
 		return "", err
 	}
