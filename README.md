@@ -66,8 +66,8 @@ With `--policy` you set the initial context and what kind of resources to captur
 
 POLICY     | ONLINE | OFFLINE
 ---        | ---    | ---
-`local:*`  | no capture/restore | local capture
-`remote:*` | remote capture     | no capture/restore
+`local:*`  | use `local` context, but no capture | use `local` context and capture it
+`remote:*` | use `remote` context and capture it | doesn't make sense (NOP)
 
 For example, if you'd use `--policy=local:deployments` and you're currently offline (that is, no connection to remote cluster) then `kube-sdx` would capture local resources of type `deployments` and once you're online, it would mirror these to the remote.
 
