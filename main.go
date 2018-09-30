@@ -27,6 +27,8 @@ var (
 	// what binary to use to speak with the API Server
 	// defaults to $(which kubectl)
 	kubectlbin string
+	// the current context reference, allowed values are `local` and `remote`
+	ccurrent string
 )
 
 func main() {
@@ -48,8 +50,6 @@ func main() {
 	var status, prevstatus string
 	// timestamp of most recent dump:
 	tsLatest := "0"
-	// the current context (on startup, determined by policy):
-	ccurrent := ""
 	// get params and env variables:
 	flag.Parse()
 	if kb := os.Getenv("SDX_KUBECTL_BIN"); kb != "" {
@@ -78,9 +78,9 @@ func main() {
 		os.Exit(2)
 	}
 	ccurrent = cinit
-	initialstate(ccurrent, *clocal, *cremote)
+	setstate(*clocal, *cremote)
 	// launch manual override module via keyboard:
-	go manualoverride(*clocal, *cremote, &ccurrent)
+	go manualoverride(*clocal, *cremote)
 	// the main control loop:
 	for {
 		// read in status from connection detector:
@@ -89,7 +89,7 @@ func main() {
 			prevstatus = status
 		}
 		// sync state and reconcile, if necessary:
-		tsl := syncNReconcile(status, prevstatus, *namespace, ccurrent, *clocal, *cremote, tsLatest, resources, *verbose)
+		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest, resources, *verbose)
 		if tsl != "" {
 			tsLatest = tsl
 		}
@@ -99,17 +99,19 @@ func main() {
 	}
 }
 
-func initialstate(cinit, clocal, cremote string) {
-	switch cinit {
+// setstate sets the context directly
+func setstate(clocal, cremote string) {
+	newcontext := ""
+	switch ccurrent {
 	case "local":
-		cinit = clocal
+		newcontext = clocal
 	case "remote":
-		cinit = cremote
+		newcontext = cremote
 	default:
-		displayerr("Can't find context", fmt.Errorf(cinit))
+		displayerr("I don't know about a context reference", fmt.Errorf(ccurrent))
 		os.Exit(2)
 	}
-	err := use(false, false, cinit)
+	err := use(false, false, newcontext)
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
 		os.Exit(2)

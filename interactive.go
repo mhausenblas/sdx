@@ -7,18 +7,20 @@ import (
 )
 
 // manualoverride allows for using keystrokes to override the
-// current context
-func manualoverride(clocal, cremote string, ccurent *string) {
+// current context, setting the global variable and kubectl it.
+func manualoverride(clocal, cremote string) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		input := scanner.Text()
 		switch input {
 		case "l", "local", "use local":
 			displayinfo(fmt.Sprintf("Overriding state, switching to local context %v", clocal))
-			ccurent = &clocal
+			ccurrent = "local"
+			setstate(clocal, cremote)
 		case "r", "remote", "use remote":
 			displayinfo(fmt.Sprintf("Overriding state, switching to remote context %v", cremote))
-			ccurent = &cremote
+			ccurrent = "remote"
+			setstate(clocal, cremote)
 		default:
 		}
 	}

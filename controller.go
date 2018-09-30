@@ -8,12 +8,12 @@ import (
 // syncNReconcile syncs the state, reconciles (applies to new environment),
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
-func syncNReconcile(status, prevstatus, namespace, ccurrent, clocal, cremote, tsLast, resources string, verbose bool) (tsLatest string) {
+func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, resources string, verbose bool) (tsLatest string) {
 	withstderr := verbose
 	var namespacestate string
 	var err error
 	if verbose {
-		fmt.Printf("Controller sees: \x1b[92mstatus:%v currentcontext: %v\x1b[0m\n", status, ccurrent)
+		fmt.Printf("Controller sees: \x1b[92mstatus: %v context: %v\x1b[0m\n", status, ccurrent)
 	}
 	// capture the current namespace state:
 	if (status == StatusOffline && ccurrent == "local") ||
