@@ -12,6 +12,9 @@ func syncNReconcile(status, prevstatus, namespace, ccurrent, clocal, cremote, ts
 	withstderr := verbose
 	var namespacestate string
 	var err error
+	if verbose {
+		fmt.Printf("Controller sees: \x1b[92mstatus:%v currentcontext: %v\x1b[0m\n", status, ccurrent)
+	}
 	// capture the current namespace state:
 	if (status == StatusOffline && ccurrent == "local") ||
 		(status == StatusOnline && ccurrent == "remote") {
