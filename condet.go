@@ -14,18 +14,19 @@ import (
 func observeconnection(cremote, clocal string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
-	cctx := resolvectx(cremote, clocal)
 	for {
+		cctx := resolvectx(cremote, clocal)
 		probeURL = getAPIServerURL(cctx)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
 		if err != nil {
 			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in:\n%v\x1b[0m\n", StatusOffline, err)
-			cctx = clocal
+			ccurrent = "local"
 			constat <- StatusOffline
 			continue
 		}
 		fmt.Printf("\x1b[93mConnection detection [%v], probe %v resulted in:\n%v\x1b[0m\n", StatusOnline, probeURL, resp.Status)
+		ccurrent = "remote"
 		constat <- StatusOnline
 		time.Sleep(CheckConnectionDelaySeconds * time.Second)
 	}

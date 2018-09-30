@@ -13,7 +13,11 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	var namespacestate string
 	var err error
 	if verbose {
-		fmt.Printf("Controller sees: \x1b[92mstatus: %v context: %v\x1b[0m\n", status, ccurrent)
+		fmt.Printf("Controller sees: \x1b[92mstatus: %v prev status: %v context: %v\x1b[0m\n", status, prevstatus, ccurrent)
+	}
+	// if nothing changed since previous check, we're done
+	if status == prevstatus {
+		return tsLast
 	}
 	// capture the current namespace state:
 	if (status == StatusOffline && ccurrent == "local") ||
@@ -27,10 +31,6 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	}
 	if err != nil {
 		displayerr(fmt.Sprintf("Can't capture resources from namespace %v", namespace), err)
-	}
-	// if nothing changed since previous check, we're done
-	if status == prevstatus {
-		return tsLast
 	}
 	// if something changed since previous check, deal with it accordingly:
 	switchnresurrect(status, clocal, cremote, tsLast, withstderr, verbose)
