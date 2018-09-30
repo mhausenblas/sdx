@@ -35,6 +35,7 @@ Download the binary, rename it to `kube-sdx` and put it on your path, and finall
 
 ## Use
 
+### Basics
 Once downloaded and set up, you can launch `kube-sdx` like so:
 
 ```bash
@@ -62,7 +63,9 @@ So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;
 
 NOTE: If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
 
-With `--policy` you set the initial context and what kind of resources to capture (and consequently restore, after a switch):
+### Policies
+
+With `--policy` you set the initial context and what kind of resources to capture and consequently restore, after a switch from either `ONLINE` to `OFFLINE` or the other way round. The logic is as follows:
 
 POLICY     | ONLINE | OFFLINE
 ---        | ---    | ---
