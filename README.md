@@ -62,6 +62,12 @@ So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;
 
 NOTE: If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
 
+POLICY     | ONLINE | OFFLINE
+---        | ---    | ---
+`local:*`  | no capture/restore | local capture
+`remote:*` | remote capture     | no capture/restore
+
+
 ## Platform-specific notes
 
 Under Windows, you *must* specify the `SDX_KUBECTL_BIN` environment variable, since auto-discovery doesn't work there. Also, if you are using an OpenShift remote cluster, you typically want to set `SDX_KUBECTL_BIN` to `$(which oc)`.
