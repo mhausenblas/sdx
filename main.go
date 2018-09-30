@@ -70,7 +70,6 @@ func main() {
 	// display config in use:
 	showcfg(*clocal, *cremote, *namespace)
 	// make sure the initial status is set correctly:
-	status = <-constat
 	cinit, resources, err := expandp(*policy)
 	if err != nil {
 		displayerr("Can't set initial context", err)
@@ -116,13 +115,18 @@ func initialstate(cinit, clocal, cremote string) {
 func showcfg(clocal, cremote, namespace string) {
 	fmt.Println("--- STARTING SDX\n")
 	fmt.Printf("I'm using the following configuration:\n")
-	fmt.Printf("- local context: \x1b[34m%v\x1b[0m\n", clocal)
-	fmt.Printf("- remote context: \x1b[34m%v\x1b[0m\n", cremote)
-	fmt.Printf("- namespace to keep alive: \x1b[34m%v\x1b[0m\n", namespace)
+	fmt.Printf("- local context: \x1b[96m%v\x1b[0m\n", clocal)
+	fmt.Printf("- remote context: \x1b[96m%v\x1b[0m\n", cremote)
+	fmt.Printf("- namespace to keep alive: \x1b[96m%v\x1b[0m\n", namespace)
 	fmt.Println("---\n")
 }
 
-// displayerr write message and error out to stderr
+// displayinfo writes message to stdout
+func displayinfo(msg string) {
+	_, _ = fmt.Fprintf(os.Stdout, "\x1b[32m%v\x1b[0m\n", msg)
+}
+
+// displayerr writes message and error out to stderr
 func displayerr(msg string, err error) {
 	_, _ = fmt.Fprintf(os.Stderr, "%v: \x1b[91m%v\x1b[0m\n", msg, err)
 }

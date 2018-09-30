@@ -9,12 +9,13 @@ import (
 // and switch over to it, IFF there was a change in the status, that is,
 // ONLINE -> OFFLINE or other way round.
 func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, resources string, verbose bool) (tsLatest string) {
-	withstderr := true
+	withstderr := verbose
 	// capture the current namespace state and dump it:
 	namespacestate, err := capture(withstderr, verbose, namespace, resources)
 	if err != nil {
 		displayerr("Can't capture namespace state", err)
 	}
+	displayinfo(fmt.Sprintf("Successfully captured %v in %v", resources, namespace))
 	tsLatest, err = dump(status, namespacestate)
 	if err != nil {
 		displayerr("Can't dump namespace state", err)
@@ -44,5 +45,8 @@ func cases(status, prevstatus, clocal, cremote, tsLast string, withstderr, verbo
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
-	fmt.Printf("\x1b[34m%v\x1b[0m", res)
+	displayinfo(fmt.Sprintf("Successfully restored resources in %v", status))
+	if verbose {
+		fmt.Printf("\x1b[34m%v\x1b[0m", res)
+	}
 }
