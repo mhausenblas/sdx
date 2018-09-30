@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
@@ -79,6 +80,8 @@ func main() {
 	}
 	ccurrent = cinit
 	initialstate(ccurrent, *clocal, *cremote)
+	// launch manual override module via keyboard:
+	go manualoverride(*clocal, *cremote, &ccurrent)
 	// the main control loop:
 	for {
 		// read in status from connection detector:
@@ -143,4 +146,20 @@ func expandp(policy string) (cinit, resources string, err error) {
 	}
 	cinit, resources = strings.Split(policy, ":")[0], strings.Split(policy, ":")[1]
 	return cinit, resources, nil
+}
+
+func manualoverride(clocal, cremote string, ccurent *string) {
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		input := scanner.Text()
+		switch input {
+		case "l", "local", "use local":
+			displayinfo(fmt.Sprintf("Overriding state, switching to local context %v", clocal))
+			ccurent = &clocal
+		case "r", "remote", "use remote":
+			displayinfo(fmt.Sprintf("Overriding state, switching to remote context %v", cremote))
+			ccurent = &cremote
+		default:
+		}
+	}
 }

@@ -87,6 +87,6 @@ func use(withstderr, verbose bool, context string) error {
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
 	}
-	fmt.Printf("Now using context %v\n", context)
+	displayinfo(fmt.Sprintf("Now using context [%v]", context))
 	return err
 }
