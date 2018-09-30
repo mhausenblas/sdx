@@ -48,6 +48,8 @@ func main() {
 	var status, prevstatus string
 	// timestamp of most recent dump:
 	tsLatest := "0"
+	// the current context (on startup, determined by policy):
+	ccurrent := ""
 	// get params and env variables:
 	flag.Parse()
 	if kb := os.Getenv("SDX_KUBECTL_BIN"); kb != "" {
@@ -75,7 +77,8 @@ func main() {
 		displayerr("Can't set initial context", err)
 		os.Exit(2)
 	}
-	initialstate(cinit, *clocal, *cremote)
+	ccurrent = cinit
+	initialstate(ccurrent, *clocal, *cremote)
 	// the main control loop:
 	for {
 		// read in status from connection detector:
@@ -84,7 +87,7 @@ func main() {
 			prevstatus = status
 		}
 		// sync state and reconcile, if necessary:
-		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest, resources, *verbose)
+		tsl := syncNReconcile(status, prevstatus, *namespace, ccurrent, *clocal, *cremote, tsLatest, resources, *verbose)
 		if tsl != "" {
 			tsLatest = tsl
 		}
