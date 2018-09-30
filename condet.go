@@ -14,14 +14,14 @@ import (
 func observeconnection(cremote, clocal string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
-	ccurrent := cremote
+	cctx := resolvectx(cremote, clocal)
 	for {
-		probeURL = getAPIServerURL(ccurrent)
+		probeURL = getAPIServerURL(cctx)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
 		if err != nil {
 			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in:\n%v\x1b[0m\n", StatusOffline, err)
-			ccurrent = clocal
+			cctx = clocal
 			constat <- StatusOffline
 			continue
 		}
@@ -57,4 +57,16 @@ func clusterfromcontext(kubectx string) string {
 	default:
 		return kubectx
 	}
+}
+
+// resolvectx resolves the context reference, returning
+// the actual context to use
+func resolvectx(cremote, clocal string) string {
+	switch ccurrent {
+	case "local":
+		return clocal
+	case "remote":
+		return cremote
+	}
+	return ""
 }

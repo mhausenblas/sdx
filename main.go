@@ -14,7 +14,7 @@ const (
 	// StatusOffline signals we do not have access to the remote cluster:
 	StatusOffline = "OFFLINE"
 	// ProbeTimeoutSeconds defines how long to try to get a result when probing:
-	ProbeTimeoutSeconds = 10
+	ProbeTimeoutSeconds = 5
 	// CheckConnectionDelaySeconds defines how long to wait between two connection checks:
 	CheckConnectionDelaySeconds = 2
 	// SyncStateSeconds defines how long to wait between two reconcile rounds:
@@ -67,8 +67,6 @@ func main() {
 		fmt.Println(contexts)
 		os.Exit(2)
 	}
-	// launch the connection detector:
-	go observeconnection(*cremote, *clocal, constat)
 	// display config in use:
 	showcfg(*clocal, *cremote, *namespace)
 	// make sure the initial status is set correctly:
@@ -79,6 +77,8 @@ func main() {
 	}
 	ccurrent = cinit
 	setstate(*clocal, *cremote)
+	// launch the connection detector:
+	go observeconnection(*cremote, *clocal, constat)
 	// launch manual override module via keyboard:
 	go manualoverride(*clocal, *cremote)
 	// the main control loop:
