@@ -62,11 +62,14 @@ So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;
 
 NOTE: If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
 
+With `--policy` you set the initial context and what kind of resources to capture (and consequently restore, after a switch):
+
 POLICY     | ONLINE | OFFLINE
 ---        | ---    | ---
 `local:*`  | no capture/restore | local capture
 `remote:*` | remote capture     | no capture/restore
 
+For example, if you'd use `--policy=local:deployments` and you're currently offline (that is, no connection to remote cluster) then `kube-sdx` would capture local resources of type `deployments` and once you're online, it would mirror these to the remote.
 
 ## Platform-specific notes
 
