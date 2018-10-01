@@ -16,8 +16,7 @@ func observeconnection(cremote, clocal string, constat chan string) {
 	var probeURL string
 	var cctx string
 	for {
-		cctx = resolvectx(cremote, clocal)
-		probeURL = getAPIServerURL(cctx)
+		probeURL = getAPIServerURL(cremote)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
 		if err != nil {
