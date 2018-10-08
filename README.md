@@ -15,12 +15,16 @@ This is a prototype of a command line tool called `kube-sdx`, enabling you to au
 We assume you have `kubectl` (or OpenShift's `oc`) command line tool installed and configured as well as that you have a local cluster (Minikube, Minishift, Docker for Desktop) set up and at least one remote cluster configured. The tests have been carried out with the following configuration:
 
 ```bash
-$ kubectl version --short
-Client Version: v1.11.3
-Server Version: v1.10.0
-
+# Minikube:
 $ minikube version
-minikube version: v0.28.2
+minikube version: v0.30.0
+
+$ kubectl version --short
+Client Version: v1.12.0
+Server Version: v1.11.0
+
+# OpenShift Online:
+TBD
 ```
 
 ## Install
