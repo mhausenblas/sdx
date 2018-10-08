@@ -14,13 +14,21 @@ import (
 // ensure checks if, depending on the status, the remote or local
 // clusters are actually available (in case of local, launches it
 //  if this is not the case)
-func ensure(status, clocal, cremote string) error {
+func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
-		fmt.Printf("Attempting to switch to %v, checking if local cluster is available\n", clocal)
+		fmt.Printf("Attempting to switch to %v, checking if local cluster is available and ready\n", clocal)
+		_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "namespace", namespace)
+		if err != nil {
+			displayinfo(fmt.Sprintf("The namespace %v is not present, creating it now", namespace))
+			_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "create", "namespace", namespace)
+			if err != nil {
+				return err
+			}
+		}
 		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
 	case StatusOnline:
-		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available \n", cremote)
+		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
 		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
 	}
 	return nil

@@ -20,7 +20,7 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	// and if we have a change, try switching over
 	if (status == StatusOffline && ccurrent == "local") ||
 		(status == StatusOnline && ccurrent == "remote") {
-		switchnresurrect(status, clocal, cremote, tsLast, withstderr, verbose)
+		switchnresurrect(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
 		namespacestate, err = capture(withstderr, verbose, namespace, resources)
 		if err != nil {
 			displayerr("No bueno capturing state", err)
@@ -46,15 +46,15 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 
 // switchnresurrect checks which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 // and respectively switches the context and restores state. It also makes sure remote or local are available.
-func switchnresurrect(status, clocal, cremote, tsLast string, withstderr, verbose bool) {
+func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremote, tsLast string) {
 	var res string
 	switch status {
 	case StatusOffline:
-		_ = ensure(status, clocal, cremote)
+		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
 		_ = use(withstderr, verbose, clocal)
 		res, _ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 	case StatusOnline:
-		_ = ensure(status, clocal, cremote)
+		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
 		_ = use(withstderr, verbose, cremote)
 		res, _ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
