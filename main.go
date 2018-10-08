@@ -63,7 +63,7 @@ func main() {
 		fmt.Println("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n")
 		contexts, err := kubecuddler.Kubectl(false, false, kubectlbin, "config", "get-contexts")
 		if err != nil {
-			displayerr("Can't cuddle the cluster", err)
+			displayerr("Can't cuddle the Kube", err)
 			os.Exit(1)
 		}
 		fmt.Println(contexts)
@@ -87,9 +87,9 @@ func main() {
 	for {
 		// read in status from connection detector:
 		status = <-constat
-		if prevstatus == "" {
-			prevstatus = status
-		}
+		// if prevstatus == "" {
+		// 	prevstatus = status
+		// }
 		// sync state and reconcile, if necessary:
 		tsl := syncNReconcile(status, prevstatus, *namespace, *clocal, *cremote, tsLatest, resources, *verbose)
 		if tsl != "" {
@@ -115,7 +115,7 @@ func setstate(clocal, cremote string) {
 	}
 	err := use(false, false, newcontext)
 	if err != nil {
-		displayerr("Can't cuddle the cluster", err)
+		displayerr("Can't cuddle the Kube", err)
 		os.Exit(2)
 	}
 }
