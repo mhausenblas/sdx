@@ -80,7 +80,7 @@ func main() {
 	ccurrent = cinit
 	setstate(*clocal, *cremote)
 	// launch the connection detector:
-	go observeconnection(*cremote, *clocal, constat)
+	go observeconnection(*clocal, *cremote, constat)
 	// launch manual override module via keyboard:
 	go manualoverride(*clocal, *cremote, constat)
 	// the main control loop:

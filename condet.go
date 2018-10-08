@@ -13,7 +13,7 @@ import (
 // observeconnection is the connection detector. It tries to do an HTTP GET against
 // probeURL and if *anything* comes back we consider ourselves to be online, otherwise
 // some network issues prevents us from doing the GET and we are likely offline.
-func observeconnection(cremote, clocal string, constat chan string) {
+func observeconnection(clocal, cremote string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
 	for {
