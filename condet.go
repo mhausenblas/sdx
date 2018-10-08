@@ -17,6 +17,14 @@ func observeconnection(clocal, cremote string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
 	for {
+		// make sure that when user has manually overridden to use local
+		// context that we disable connection detection with the consequence
+		// that until the user selects remote context again no auto-switch
+		// is performed:
+		if ccurrent == "local" {
+			constat <- StatusOffline
+			break
+		}
 		probeURL = getAPIServerURL(cremote)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
