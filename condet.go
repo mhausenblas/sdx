@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/mhausenblas/kubecuddler"
 )
 
 // observeconnection is the connection detector. It tries to do an HTTP GET against
@@ -14,7 +16,6 @@ import (
 func observeconnection(cremote, clocal string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
-	var cctx string
 	for {
 		probeURL = getAPIServerURL(cremote)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
@@ -35,7 +36,7 @@ func observeconnection(cremote, clocal string, constat chan string) {
 // getAPIServerURL looks up the API Server url of the kubectx provided.
 func getAPIServerURL(kubectx string) string {
 	clustername := clusterfromcontext(kubectx)
-	probeURL, err := kubectl(false, false, "config", "view",
+	probeURL, err := kubecuddler.Kubectl(false, false, kubectlbin, "config", "view",
 		"--output=jsonpath='{.clusters[?(@.name == \""+clustername+"\")]..server}'")
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)

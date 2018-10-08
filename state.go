@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/mhausenblas/kubecuddler"
 )
 
 // ensure checks if, depending on the status, the remote or local
@@ -34,7 +36,7 @@ func capture(withstderr, verbose bool, namespace, resources string) (string, err
 	resourcelist := strings.Split(resources, ",")
 	for _, reskind := range resourcelist {
 		reskind = strings.TrimSpace(reskind)
-		yamlfrag, err := kubectl(withstderr, verbose, "get", "--namespace="+namespace, reskind, "--output=yaml")
+		yamlfrag, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "--namespace="+namespace, reskind, "--output=yaml")
 		if err != nil {
 			displayerr("Can't cuddle the cluster", err)
 			return "", err
@@ -68,7 +70,7 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 		fmt.Printf("Trying to restore state from %v/latest.yaml@%v\n", state, tsLast)
 	}
 	if _, err = os.Stat(statefile); !os.IsNotExist(err) {
-		res, err = kubectl(withstderr, verbose, "apply", "--filename="+statefile)
+		res, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "apply", "--filename="+statefile)
 		if err != nil {
 			displayerr("Can't cuddle the cluster", err)
 			return "", err
@@ -83,7 +85,7 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 // use switches over to provided context as in:
 // `kubectl config use-context minikube`
 func use(withstderr, verbose bool, context string) error {
-	_, err := kubectl(withstderr, verbose, "config", "use-context", context)
+	_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "config", "use-context", context)
 	if err != nil {
 		displayerr("Can't cuddle the cluster", err)
 	}

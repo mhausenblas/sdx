@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mhausenblas/kubecuddler"
 )
 
 const (
@@ -59,7 +61,7 @@ func main() {
 	if *cremote == "" {
 		fmt.Println("\x1b[91mI'm sorry Dave, I'm afraid I can't do that.\x1b[0m")
 		fmt.Println("I need to know which remote context you want, pick one from below and provide it via the \x1b[1m--remote\x1b[0m parameter:\n")
-		contexts, err := kubectl(false, false, "config", "get-contexts")
+		contexts, err := kubecuddler.Kubectl(false, false, kubectlbin, "config", "get-contexts")
 		if err != nil {
 			displayerr("Can't cuddle the cluster", err)
 			os.Exit(1)
