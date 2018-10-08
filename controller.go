@@ -16,6 +16,9 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 		fmt.Printf("Controller sees: \x1b[92mstatus: %v prev status: %v context: %v\x1b[0m\n", status, prevstatus, ccurrent)
 	}
 
+	if status == prevstatus {
+		return tsLast
+	}
 	// capture the current namespace resources depending on the state
 	// and if we have a change, try switching over
 	if (status == StatusOffline && ccurrent == "local") ||
@@ -50,12 +53,14 @@ func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremo
 	var res string
 	switch status {
 	case StatusOffline:
-		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
 		_ = use(withstderr, verbose, clocal)
+		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
 		res, _ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 	case StatusOnline:
-		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
 		_ = use(withstderr, verbose, cremote)
+		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
 		res, _ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)

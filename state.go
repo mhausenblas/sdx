@@ -12,8 +12,7 @@ import (
 )
 
 // ensure checks if, depending on the status, the remote or local
-// clusters are actually available (in case of local, launches it
-//  if this is not the case)
+// clusters are set up correctly, for example, the namespace exists.
 func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
@@ -26,10 +25,8 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 				return err
 			}
 		}
-		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
 	case StatusOnline:
 		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
-		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
 	}
 	return nil
 }
