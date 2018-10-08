@@ -20,6 +20,7 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	// and if we have a change, try switching over
 	if (status == StatusOffline && ccurrent == "local") ||
 		(status == StatusOnline && ccurrent == "remote") {
+		switchnresurrect(status, clocal, cremote, tsLast, withstderr, verbose)
 		namespacestate, err = capture(withstderr, verbose, namespace, resources)
 		if err != nil {
 			displayerr("No bueno capturing state", err)
@@ -31,11 +32,11 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 		}
 		displayinfo(fmt.Sprintf("Successfully backed up %v from namespace %v", resources, namespace))
 		// if nothing changed since previous check, we're done
-		if status == prevstatus {
-			return tsLast
-		}
+		// if status == prevstatus {
+		// 	return tsLast
+		// }
 		// if something changed since previous check, deal with it accordingly:
-		switchnresurrect(status, clocal, cremote, tsLast, withstderr, verbose)
+		// switchnresurrect(status, clocal, cremote, tsLast, withstderr, verbose)
 	}
 	if err != nil {
 		displayerr(fmt.Sprintf("Can't capture resources from namespace %v", namespace), err)
