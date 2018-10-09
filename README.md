@@ -23,8 +23,10 @@ $ kubectl version --short
 Client Version: v1.12.0
 Server Version: v1.11.0
 
-# OpenShift Online:
-TBD
+# OpenShift Online Pro:
+$ kubectl version --short
+Client Version: v1.12.0
+Server Version: v1.9.1+a0ce1bc657
 ```
 
 ## Install
