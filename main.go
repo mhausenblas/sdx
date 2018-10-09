@@ -53,6 +53,11 @@ func main() {
 	var status, prevstatus string
 	// timestamp of most recent dump:
 	tsLatest := "0"
+
+	if len(os.Args) > 1 && os.Args[1] == "version" {
+		fmt.Printf("This is the Kubernetes Seamless Developer Experience (sdx) tool in version %v\n", releaseVersion)
+		os.Exit(0)
+	}
 	// get params and env variables:
 	flag.Parse()
 	if kb := os.Getenv("SDX_KUBECTL_BIN"); kb != "" {

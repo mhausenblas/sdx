@@ -12,3 +12,4 @@
 *.out
 /kube-sdx
 .DS_Store
+/out
