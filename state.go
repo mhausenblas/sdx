@@ -22,6 +22,7 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 		if err != nil {
 			return err
 		}
+		time.Sleep(10 * time.Second)
 		_, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "create", "namespace", namespace)
 		if err != nil {
 			return err
