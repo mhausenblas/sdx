@@ -13,7 +13,7 @@ import (
 // observeconnection is the connection detector. It tries to do an HTTP GET against
 // probeURL and if *anything* comes back we consider ourselves to be online, otherwise
 // some network issues prevents us from doing the GET and we are likely offline.
-func observeconnection(clocal, cremote string, constat chan string) {
+func observeconnection(verbose bool, clocal, cremote string, constat chan string) {
 	// the endpoint we're using to check if we're online or offline:
 	var probeURL string
 	for {
@@ -23,18 +23,21 @@ func observeconnection(clocal, cremote string, constat chan string) {
 		// is performed:
 		if ccurrent == "local" {
 			constat <- StatusOffline
-			break
+			continue
 		}
 		probeURL = getAPIServerURL(cremote)
 		client := http.Client{Timeout: time.Duration(ProbeTimeoutSeconds * time.Second)}
 		resp, err := client.Get(probeURL)
 		if err != nil {
-			fmt.Printf("\x1b[93mConnection detection [%v], probe resulted in:\n%v\x1b[0m\n", StatusOffline, err)
+			fmt.Printf("\x1b[93mConnection detection [%v], probe failed\x1b[0m\n", StatusOffline)
+			if verbose {
+				displayerr("Can't reach remote", err)
+			}
 			ccurrent = "local"
 			constat <- StatusOffline
 			break
 		}
-		fmt.Printf("\x1b[93mConnection detection [%v], probe %v resulted in:\n%v\x1b[0m\n", StatusOnline, probeURL, resp.Status)
+		fmt.Printf("\x1b[93mConnection detection [%v], probe %v resulted in: %v\x1b[0m\n", StatusOnline, probeURL, resp.Status)
 		ccurrent = "remote"
 		constat <- StatusOnline
 		time.Sleep(CheckConnectionDelaySeconds * time.Second)
