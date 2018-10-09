@@ -45,7 +45,9 @@ func capture(withstderr, verbose bool, namespace, resources string) (string, err
 		reskind = strings.TrimSpace(reskind)
 		yamlfrag, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "--namespace="+namespace, reskind, "--export", "--output=yaml")
 		if err != nil {
-			displayerr("Can't export resource state", err)
+			if verbose {
+				displayerr("Can't export resource state", err)
+			}
 			return "", err
 		}
 		yamldoc += yamlfrag + "\n---\n"
@@ -83,7 +85,9 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 	if _, err = os.Stat(statefile); !os.IsNotExist(err) {
 		res, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "apply", "--filename="+statefile)
 		if err != nil {
-			displayerr("Can't apply changes", err)
+			if verbose {
+				displayerr("Can't apply changes", err)
+			}
 			return "", err
 		}
 		if verbose {
@@ -98,7 +102,9 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 func use(withstderr, verbose bool, context string) error {
 	_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "config", "use-context", context)
 	if err != nil {
-		displayerr("Can't switch context due", err)
+		if verbose {
+			displayerr("Can't switch context due", err)
+		}
 	}
 	displayinfo(fmt.Sprintf("Now using context [%v]", context))
 	return err

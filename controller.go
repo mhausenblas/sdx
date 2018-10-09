@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 )
 
 // syncNReconcile syncs the state, reconciles (applies to new environment),
@@ -23,7 +22,11 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	// and if we have a change, try switching over
 	if (status == StatusOffline && ccurrent == "local") ||
 		(status == StatusOnline && ccurrent == "remote") {
-		switchnresurrect(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
+		err = switchnresurrect(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
+		if err != nil {
+			displayerr("No bueno switching context", err)
+			return tsLast
+		}
 		namespacestate, err = capture(withstderr, verbose, namespace, resources)
 		if err != nil {
 			displayerr("No bueno capturing state", err)
@@ -63,7 +66,9 @@ func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremo
 		err = ensure(withstderr, verbose, namespace, status, clocal, cremote)
 		res, err = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
-		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
+		if verbose {
+			displayerr(fmt.Sprintf("I don't recognize %v, blame MH9\n", status), nil)
+		}
 	}
 	displayinfo(fmt.Sprintf("Successfully restored resources in %v", status))
 	if verbose {
