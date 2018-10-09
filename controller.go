@@ -49,19 +49,19 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 
 // switchnresurrect checks which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 // and respectively switches the context and restores state. It also makes sure remote or local are available.
-func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremote, tsLast string) {
+func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremote, tsLast string) (err error) {
 	var res string
 	switch status {
 	case StatusOffline:
 		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
-		_ = use(withstderr, verbose, clocal)
-		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
-		res, _ = restorefrom(withstderr, verbose, StatusOnline, tsLast)
+		err = use(withstderr, verbose, clocal)
+		err = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		res, err = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 	case StatusOnline:
 		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user
-		_ = use(withstderr, verbose, cremote)
-		_ = ensure(withstderr, verbose, namespace, status, clocal, cremote)
-		res, _ = restorefrom(withstderr, verbose, StatusOffline, tsLast)
+		err = use(withstderr, verbose, cremote)
+		err = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		res, err = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 	default:
 		fmt.Fprintf(os.Stderr, "I don't recognize %v, blame MH9\n", status)
 	}
@@ -69,4 +69,5 @@ func switchnresurrect(withstderr, verbose bool, namespace, status, clocal, cremo
 	if verbose {
 		fmt.Printf("\x1b[34m%v\x1b[0m", res)
 	}
+	return
 }

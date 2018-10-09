@@ -17,15 +17,16 @@ import (
 func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
-		fmt.Printf("Attempting to switch to %v, checking if local cluster is available and ready\n", clocal)
-		_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "namespace", namespace)
+		displayinfo(fmt.Sprintf("Checking if local context [%v] is ready\n", clocal))
+		_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "delete", "namespace", namespace)
 		if err != nil {
-			displayinfo(fmt.Sprintf("The namespace %v is not present, creating it now", namespace))
-			_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "create", "namespace", namespace)
-			if err != nil {
-				return err
-			}
+			return err
 		}
+		_, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "create", "namespace", namespace)
+		if err != nil {
+			return err
+		}
+		displayinfo(fmt.Sprintf("Recreated namespace %v in local context\n", namespace))
 	case StatusOnline:
 		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
 	}
