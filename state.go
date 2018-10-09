@@ -17,7 +17,9 @@ import (
 func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
-		displayinfo(fmt.Sprintf("Checking if local context [%v] is ready", clocal))
+		if verbose {
+			displayinfo(fmt.Sprintf("Checking if local context [%v] is ready", clocal))
+		}
 		// make sure that if the namespace exists we re-create it:
 		_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "namespace", namespace)
 		if err == nil {
@@ -32,7 +34,9 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 		}
 		displayinfo(fmt.Sprintf("Recreated namespace %v in local context", namespace))
 	case StatusOnline:
-		fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
+		if verbose {
+			fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
+		}
 	}
 	return nil
 }
