@@ -40,10 +40,10 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 
 	err = switchnresurrect(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
 	if err != nil {
-		displayerr("No bueno switching context", err)
-		return tsLast
+		if verbose {
+			displayerr("No bueno switching context", err)
+		}
 	}
-
 	return tsLatest
 }
 
