@@ -85,6 +85,16 @@ POLICY     | ONLINE | OFFLINE
 
 For example, if you'd use `--policy=local:deployments` and you're currently offline (that is, no connection to remote cluster) then `kube-sdx` would capture local resources of type `deployments` and once you're online, it would mirror these to the remote.
 
+### Interactive control
+
+While you can use `kube-sdx` fully automated, you can also (asynchronously) interact with it in the following way (always terminate with an `ENTER`):
+
+- `s` or `status` or `show status` will display the status in the form `Current status: using $SELECTED_CONTEXT context, watching namespace $NAMESPACE`.
+- `l` or `local` or `use local` will manually override to use the local context (see above policies on valid combinations with the on/offline status).
+- `r` or `remote` or `use remote` will manually override to use the remote context (see above policies on valid combinations with the on/offline status)
+
+One use case for this is to test the tool, another is to mirror the state pro-actively.
+
 ## Platform-specific notes
 
 Under Windows, you *must* specify the `SDX_KUBECTL_BIN` environment variable, since auto-discovery doesn't work there. Also, if you are using an OpenShift remote cluster, you typically want to set `SDX_KUBECTL_BIN` to `$(which oc)`.
