@@ -14,15 +14,15 @@ func manualoverride(namespace, clocal, cremote string, constat chan string) {
 		input := scanner.Text()
 		switch input {
 		case "l", "local", "use local":
-			displayinfo(fmt.Sprintf("Overriding state, switching to local context %v", clocal))
+			displayfeedback(fmt.Sprintf("Overriding state, switching to local context [%v]", clocal))
 			ccurrent = "local"
 			constat <- StatusOffline
 		case "r", "remote", "use remote":
-			displayinfo(fmt.Sprintf("Overriding state, switching to remote context %v", cremote))
+			displayfeedback(fmt.Sprintf("Overriding state, switching to remote context [%v]", cremote))
 			ccurrent = "remote"
 			constat <- StatusOnline
 		case "s", "status", "show status":
-			displayinfo(fmt.Sprintf("Current status: using %v context, watching namespace %v", ccurrent, namespace))
+			displayfeedback(fmt.Sprintf("Current status: using %v context, watching namespace %v", ccurrent, namespace))
 		default:
 		}
 	}

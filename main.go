@@ -135,6 +135,11 @@ func displayinfo(msg string) {
 	_, _ = fmt.Fprintf(os.Stdout, "\x1b[32m%v\x1b[0m\n", msg)
 }
 
+// displayfeedback writes message to stdout
+func displayfeedback(msg string) {
+	_, _ = fmt.Fprintf(os.Stdout, "\x1b[35m%v\x1b[0m\n", msg)
+}
+
 // displayerr writes message and error out to stderr
 func displayerr(msg string, err error) {
 	_, _ = fmt.Fprintf(os.Stderr, "%v: \x1b[91m%v\x1b[0m\n", msg, err)
