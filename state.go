@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -60,6 +61,10 @@ func dump(status, yamldoc string) (string, error) {
 	}
 	ts := time.Now().UnixNano()
 	fn := filepath.Join(targetdir, "latest.yaml")
+	// make sure we drop the cluster IP spec field for services:
+	re := regexp.MustCompile("(?m)[\r\n]+^.*clusterIP:.*$")
+	yamldoc = re.ReplaceAllString(yamldoc, "")
+	// write out resulting YAML doc to file:
 	err := ioutil.WriteFile(fn, []byte(yamldoc), 0644)
 	if err != nil {
 		return "", err
