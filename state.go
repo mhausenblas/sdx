@@ -41,7 +41,7 @@ func capture(withstderr, verbose bool, namespace, resources string) (string, err
 	resourcelist := strings.Split(resources, ",")
 	for _, reskind := range resourcelist {
 		reskind = strings.TrimSpace(reskind)
-		yamlfrag, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "--namespace="+namespace, reskind, "--output=yaml")
+		yamlfrag, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "get", "--namespace="+namespace, reskind, "--export", "--output=yaml")
 		if err != nil {
 			displayerr("Can't export resource state", err)
 			return "", err
