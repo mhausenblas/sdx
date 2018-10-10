@@ -33,14 +33,14 @@ Server Version: v1.9.1+a0ce1bc657
 
 We support Linux, macOS, and Windows and you can download the binaries here:
 
-- Linux: [kube-sdx_linux](https://github.com/mhausenblas/sdx/releases/download/0.1/kube-sdx_linux)
-- macOS: [kube-sdx_macos](https://github.com/mhausenblas/sdx/releases/download/0.1/kube-sdx_macos)
-- Windows: [kube-sdx_windows](https://github.com/mhausenblas/sdx/releases/download/0.1/kube-sdx_windows)
+- Linux: [kube-sdx_linux](https://github.com/mhausenblas/sdx/releases/download/0.2/kube-sdx_linux)
+- macOS: [kube-sdx_macos](https://github.com/mhausenblas/sdx/releases/download/0.2/kube-sdx_macos)
+- Windows: [kube-sdx_windows](https://github.com/mhausenblas/sdx/releases/download/0.2/kube-sdx_windows)
 
 Download the binary for your platform, rename it to `kube-sdx` and put it on your path, and (for *nix systems) make it executable, for example on a macOS system, do:
 
 ```shell
-$ curl -sL https://github.com/mhausenblas/sdx/releases/download/0.1/kube-sdx_macos -o kube-sdx
+$ curl -sL https://github.com/mhausenblas/sdx/releases/download/0.2/kube-sdx_macos -o kube-sdx
 $ chmod +x kube-sdx
 ```
 

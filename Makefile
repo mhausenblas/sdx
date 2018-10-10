@@ -1,4 +1,4 @@
-sdx_version := 0.1
+sdx_version := 0.2
 
 .PHONY: build clean
 
