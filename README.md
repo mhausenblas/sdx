@@ -2,11 +2,12 @@
 
 This is a prototype of a command line tool called `kube-sdx`, enabling you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. The `sdx` stands for seamless Developer Experience (DX) for short and the goal is to help support you in your developing on Kubernetes workflow.
 
-
-
 - [Prerequisits](#prerequisits)
 - [Install](#install)
 - [Use](#use)
+    - [Basics](#basics)
+    - [Policies](#policies)
+    - [Interactive control](#interactive-control)
 - [Platform-specific notes](#platform-specific-notes)
 - [How it works](#how-it-works)
 
@@ -47,6 +48,7 @@ $ chmod +x kube-sdx
 ## Use
 
 ### Basics
+
 Once downloaded and set up, you can launch `kube-sdx` like so:
 
 ```bash
@@ -70,9 +72,10 @@ CURRENT   NAME                                                      CLUSTER     
 
 ```
 
-So no worries, `kube-sdx` will gently remind you to set `--remote` in any case ;)
+So no worries, `kube-sdx` will gently remind you to set `--remote` in any case. If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
 
-NOTE: If you want to see `kube-sdx` in action, why don't you check out the [walkthrough](walkthrough.md) of some typical sessions?
+Also, while not strictly necessary, you will typically want to set `--policy`, it defaults to a conservative local context, otherwise.
+How to set policies? The next section explains it.
 
 ### Policies
 
@@ -84,6 +87,7 @@ POLICY     | ONLINE | OFFLINE
 `remote:*` | use `remote` context and capture it | doesn't make sense (NOP)
 
 For example, if you'd use `--policy=local:deployments` and you're currently offline (that is, no connection to remote cluster) then `kube-sdx` would capture local resources of type `deployments` and once you're online, it would mirror these to the remote.
+You can change parts of the policy (which context to use) using interactive control, and the how is explained in the next section.
 
 ### Interactive control
 
