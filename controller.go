@@ -76,7 +76,7 @@ func switchNRestore(withstderr, verbose bool, namespace, status, clocal, cremote
 				displayerr("Can't restore state", err)
 			}
 		}
-		displayinfo(fmt.Sprintf("Successfully switched to [%v] mode and restored resources in %v", status, clocal))
+		displayinfo(fmt.Sprintf("Successfully switched to [%v] mode and restored resources in [%v]", status, clocal))
 	case StatusOnline:
 		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user (?)
 		err = use(withstderr, verbose, cremote)
@@ -97,7 +97,7 @@ func switchNRestore(withstderr, verbose bool, namespace, status, clocal, cremote
 				displayerr("Can't restore state", err)
 			}
 		}
-		displayinfo(fmt.Sprintf("Successfully switched to [%v] mode and restored resources in %v", status, cremote))
+		displayinfo(fmt.Sprintf("Successfully switched to [%v] mode and restored resources in [%v]", status, cremote))
 	default:
 		if verbose {
 			displayerr(fmt.Sprintf("I don't recognize status %v, blame MH9\n", status), nil)
