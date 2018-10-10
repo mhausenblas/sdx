@@ -2,7 +2,7 @@
 
 This is a prototype of a command line tool called `kube-sdx`, enabling you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. The `sdx` stands for seamless Developer Experience (DX) for short and the goal is to help support you in your developing on Kubernetes workflow.
 
-![screen shot of kube-sdx](img/kubed-sdx-arch.png)
+![kube-sdx architecture](img/kubed-sdx-arch.png)
 
 - [Prerequisits](#prerequisits)
 - [Install](#install)
@@ -90,6 +90,10 @@ POLICY     | ONLINE | OFFLINE
 
 For example, if you'd use `--policy=local:deployments` and you're currently offline (that is, no connection to remote cluster) then `kube-sdx` would capture local resources of type `deployments` and once you're online, it would mirror these to the remote.
 You can change parts of the policy (which context to use) using interactive control, and the how is explained in the next section.
+
+From a temporal perspective, this is how it looks like to change policies:
+
+![kube-sdx's policies in action](img/kubed-sdx-timing.png)
 
 ### Interactive control
 
