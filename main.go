@@ -23,6 +23,8 @@ const (
 	SyncStateSeconds = 2
 	// StateCacheDir defines the directory to use to keep track of the local and remote state:
 	StateCacheDir = "/tmp/kube-sdx"
+	// StateFile defines the name of the file to keep track of the local and remote state:
+	StateFile = "latest.yaml"
 )
 
 var (

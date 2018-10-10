@@ -13,7 +13,7 @@ import (
 )
 
 // ensure checks if, depending on the status, the remote or local
-// clusters are set up correctly, for example, the namespace exists.
+// context are set up correctly, for example, if the namespace exists locally.
 func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
 	switch status {
 	case StatusOffline:
@@ -32,10 +32,10 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 		if err != nil {
 			return err
 		}
-		displayinfo(fmt.Sprintf("Recreated namespace %v in local context", namespace))
+		displayinfo(fmt.Sprintf("Recreated namespace [%v] in local context", namespace))
 	case StatusOnline:
 		if verbose {
-			fmt.Printf("Attempting to switch to %v, checking if remote cluster is available and ready\n", cremote)
+			fmt.Printf("Checking if remote context [%v] is ready", cremote)
 		}
 	}
 	return nil
@@ -63,15 +63,15 @@ func capture(withstderr, verbose bool, namespace, resources string) (string, err
 	return yamldoc, nil
 }
 
-// dump stores a YAML doc in a file in:
-// $StateCacheDir/$status/
+// dump stores a YAML doc in a file at $StateCacheDir/$status/$StateFile
+// It returns the timestamp  in Unix time of when the file was written.
 func dump(status, yamldoc string) (string, error) {
 	targetdir := filepath.Join(StateCacheDir, status)
 	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
 		_ = os.Mkdir(targetdir, os.ModePerm)
 	}
 	ts := time.Now().UnixNano()
-	fn := filepath.Join(targetdir, "latest.yaml")
+	fn := filepath.Join(targetdir, StateFile)
 	// make sure we drop the cluster IP spec field for services:
 	re := regexp.MustCompile("(?m)[\r\n]+^.*clusterIP:.*$")
 	yamldoc = re.ReplaceAllString(yamldoc, "")
@@ -83,12 +83,11 @@ func dump(status, yamldoc string) (string, error) {
 	return fmt.Sprintf("%v", ts), nil
 }
 
-// restorefrom applies resources from the YAML doc at:
-// $StateCacheDir/$state/$timestamp_of_last_state_dump
+// restorefrom applies resources from the YAML doc at $StateCacheDir/$state/$StateFile
 func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, err error) {
-	statefile := filepath.Join(StateCacheDir, state, "latest.yaml")
+	statefile := filepath.Join(StateCacheDir, state, StateFile)
 	if verbose {
-		fmt.Printf("Trying to restore state from %v/latest.yaml@%v\n", state, tsLast)
+		fmt.Printf("Trying to restore state from %v/%v@%v\n", state, StateFile, tsLast)
 	}
 	if _, err = os.Stat(statefile); !os.IsNotExist(err) {
 		res, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "apply", "--filename="+statefile)
@@ -102,13 +101,12 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 	return res, err
 }
 
-// use switches over to provided context as in:
-// `kubectl config use-context minikube`
+// use switches over to the provided context using `kubectl config use-context`.
 func use(withstderr, verbose bool, context string) error {
 	_, err := kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "config", "use-context", context)
 	if err != nil {
 		if verbose {
-			displayerr("Can't switch context due", err)
+			displayerr("Can't switch context", err)
 		}
 	}
 	displayinfo(fmt.Sprintf("Now using context [%v]", context))
