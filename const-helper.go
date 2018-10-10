@@ -63,12 +63,13 @@ func setstate(clocal, cremote string) {
 
 // showcfg prints the current config to screen
 func showcfg(clocal, cremote, namespace string) {
-	fmt.Println("\n*** STARTING SDX\n")
-	fmt.Printf("I'm using the following configuration:\n")
+	fmt.Println(strings.Repeat("*", 80))
+	fmt.Printf("This is kube-sdx %v, using the following configuration:\n\n", releaseVersion)
 	fmt.Printf("- local context: \x1b[96m%v\x1b[0m\n", clocal)
 	fmt.Printf("- remote context: \x1b[96m%v\x1b[0m\n", cremote)
 	fmt.Printf("- namespace to keep alive: \x1b[96m%v\x1b[0m\n", namespace)
-	fmt.Println("***\n")
+	fmt.Printf("- cache: \x1b[96m%v\x1b[0m\n", StateCacheDir)
+	fmt.Println(strings.Repeat("*", 80))
 }
 
 // expandp checks if we're dealing with a valid policy string and if so,

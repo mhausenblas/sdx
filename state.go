@@ -32,9 +32,6 @@ func initcache(verbose bool) {
 			}
 		}
 	}
-	if verbose {
-		displayinfo(fmt.Sprintf("\nSet up local cache in %v", StateCacheDir))
-	}
 }
 
 // ensure checks if, depending on the status, the remote or local
