@@ -40,7 +40,7 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 		}
 	}
 	// in any case, switch context and restore state from other context:
-	err = switchNRestore(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
+	switchNRestore(withstderr, verbose, namespace, status, clocal, cremote, tsLast)
 	if err != nil {
 		if verbose {
 			displayerr("No bueno switching context", err)
@@ -52,13 +52,24 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 // switchNRestore checks which case we have, ONLINE -> OFFLINE or OFFLINE -> ONLINE
 // and respectively switches to the context as well as restores the state there.
 // Note that it also tries to makes sure remote or local contexts are prepared.
-func switchNRestore(withstderr, verbose bool, namespace, status, clocal, cremote, tsLast string) (err error) {
+func switchNRestore(withstderr, verbose bool, namespace, status, clocal, cremote, tsLast string) {
 	var res string
+	var err error
 	switch status {
 	case StatusOffline:
 		// TODO(mhausenblas): do a "minikube status" or "minishift status" and if not "Running", start it
 		err = use(withstderr, verbose, clocal)
+		if err != nil {
+			if verbose {
+				displayerr("Can't switch context", err)
+			}
+		}
 		err = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		if err != nil {
+			if verbose {
+				displayerr("Can't prep context", err)
+			}
+		}
 		res, err = restorefrom(withstderr, verbose, StatusOnline, tsLast)
 		if err != nil {
 			if verbose {
@@ -69,7 +80,17 @@ func switchNRestore(withstderr, verbose bool, namespace, status, clocal, cremote
 	case StatusOnline:
 		// TODO(mhausenblas): do a "kubectl get --raw /api" and if not ready, warn user (?)
 		err = use(withstderr, verbose, cremote)
+		if err != nil {
+			if verbose {
+				displayerr("Can't switch context", err)
+			}
+		}
 		err = ensure(withstderr, verbose, namespace, status, clocal, cremote)
+		if err != nil {
+			if verbose {
+				displayerr("Can't prep context", err)
+			}
+		}
 		res, err = restorefrom(withstderr, verbose, StatusOffline, tsLast)
 		if err != nil {
 			if verbose {
