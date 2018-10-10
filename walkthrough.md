@@ -25,44 +25,40 @@ Now let's launch it with some sensible values set:
 $ kube-sdx \
   --namespace=mh9sandbox \
   --remote=mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
---- STARTING SDX
+  --policy="remote:deployments,services"
+********************************************************************************
+This is kube-sdx 0.2, using the following configuration:
 
-I'm using the following configuration:
 - local context: minikube
 - remote context: mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 - namespace to keep alive: mh9sandbox
----
-
+- cache: /tmp/kube-sdx
+********************************************************************************
 Now using context [mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb]
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in:
-200 OK
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in: 200 OK
 Successfully backed up deployments,services from namespace mh9sandbox
 Now using context [mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb]
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in:
-200 OK
+Successfully switched to [ONLINE] mode and restored resources in mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in: 200 OK
 s
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in: 200 OK
 Current status: using remote context, watching namespace mh9sandbox
-Successfully restored resources in ONLINE
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in: 200 OK
 l
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in:
-200 OK
-Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in:
-200 OK
 Overriding state, switching to local context [minikube]
 Successfully backed up deployments,services from namespace mh9sandbox
 Now using context [minikube]
-s
-Current status: using local context, watching namespace mh9sandbox
-Recreated namespace mh9sandbox in local context
-Successfully restored resources in OFFLINE
+Recreated namespace [mh9sandbox] in local context
+Successfully switched to [OFFLINE] mode and restored resources in minikube
 r
 Overriding state, switching to remote context [mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb]
+Connection detection [ONLINE], probe https://api.pro-us-east-1.openshift.com:443 resulted in: 200 OK
 Successfully backed up deployments,services from namespace mh9sandbox
 Now using context [mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb]
-Successfully restored resources in ONLINE
-s
-Current status: using remote context, watching namespace mh9sandbox
+Successfully switched to [ONLINE] mode and restored resources in mh9sandbox/api-pro-us-east-1-openshift-com:443/mhausenb
 ^C
+Nuked local cache, all state gone. Thanks for using kube-sdx and have a nice day! :)
+
 $
 ```
 
