@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -49,6 +51,15 @@ func main() {
 	if *cremote == "" {
 		handlenoremote()
 	}
+	// make sure we don't leave some crap state in the local cache
+	// when user exits via CTRL+C:
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		emptycache(*verbose)
+		os.Exit(0)
+	}()
 	// display config in use:
 	showcfg(*clocal, *cremote, *namespace)
 	// make sure the initial status is set correctly:

@@ -112,3 +112,22 @@ func use(withstderr, verbose bool, context string) error {
 	displayinfo(fmt.Sprintf("Now using context [%v]", context))
 	return err
 }
+
+// emptycache deletes the state files in $StateCacheDir/$state/*
+func emptycache(verbose bool) {
+	targetdir := filepath.Join(StateCacheDir, StatusOffline)
+	err := os.Remove(filepath.Join(targetdir, StateFile))
+	if err != nil {
+		if verbose {
+			displayerr("\nCan't clean up state", err)
+		}
+	}
+	targetdir = filepath.Join(StateCacheDir, StatusOnline)
+	err = os.Remove(filepath.Join(targetdir, StateFile))
+	if err != nil {
+		if verbose {
+			displayerr("\nCan't clean up state", err)
+		}
+	}
+	displayinfo("\nNuked local cache, all state gone. Thanks for using kube-sdx and have a nice day! :)")
+}
