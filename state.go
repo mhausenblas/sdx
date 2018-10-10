@@ -35,7 +35,7 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 		displayinfo(fmt.Sprintf("Recreated namespace [%v] in local context", namespace))
 	case StatusOnline:
 		if verbose {
-			fmt.Printf("Checking if remote context [%v] is ready", cremote)
+			fmt.Printf("Checking if remote context [%v] is ready\n", cremote)
 		}
 	}
 	return nil

@@ -14,7 +14,7 @@ func syncNReconcile(status, prevstatus, namespace, clocal, cremote, tsLast, reso
 	var namespacestate string
 	var err error
 	if verbose {
-		fmt.Printf("Controller sees: \x1b[92m current status: [%v] - previous status: [%v] - active context: [%v]\x1b[0m\n", status, prevstatus, ccurrent)
+		fmt.Printf("Controller sees: current status: [%v] - previous status: [%v] - active context: [%v]\n", status, prevstatus, ccurrent)
 	}
 	// only act if there was a state change:
 	if status == prevstatus {
