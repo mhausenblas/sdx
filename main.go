@@ -88,7 +88,7 @@ func main() {
 	// launch the connection detector:
 	go observeconnection(*verbose, *clocal, *cremote, constat)
 	// launch manual override module via keyboard:
-	go manualoverride(*namespace, *clocal, *cremote, constat)
+	go interactivectl(*namespace, *clocal, *cremote, constat)
 	// the main control loop:
 	for {
 		// read in status from connection detector:

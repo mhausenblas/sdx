@@ -6,9 +6,10 @@ import (
 	"os"
 )
 
-// manualoverride allows for using keystrokes to override the
-// current context, setting the global variable and kubectl it.
-func manualoverride(namespace, clocal, cremote string, constat chan string) {
+// interactivectl enables interactive control, allowing you to use
+// commands typed into the terminal to query and/or override the
+// current context (manually override).
+func interactivectl(namespace, clocal, cremote string, constat chan string) {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		input := scanner.Text()
