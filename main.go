@@ -117,12 +117,12 @@ func main() {
 func setstate(clocal, cremote string) {
 	newcontext := ""
 	switch ccurrent {
-	case "local":
+	case ContextLocal:
 		newcontext = clocal
-	case "remote":
+	case ContextRemote:
 		newcontext = cremote
 	default:
-		displayerr("I don't know about a context reference", fmt.Errorf(ccurrent))
+		displayerr("I don't know about the context reference", fmt.Errorf(ccurrent))
 		os.Exit(2)
 	}
 	err := use(false, false, newcontext)
@@ -134,12 +134,12 @@ func setstate(clocal, cremote string) {
 
 // showcfg prints the current config to screen
 func showcfg(clocal, cremote, namespace string) {
-	fmt.Println("--- STARTING SDX\n")
+	fmt.Println("\n*** STARTING SDX\n")
 	fmt.Printf("I'm using the following configuration:\n")
 	fmt.Printf("- local context: \x1b[96m%v\x1b[0m\n", clocal)
 	fmt.Printf("- remote context: \x1b[96m%v\x1b[0m\n", cremote)
 	fmt.Printf("- namespace to keep alive: \x1b[96m%v\x1b[0m\n", namespace)
-	fmt.Println("---\n")
+	fmt.Println("***\n")
 }
 
 // displayinfo writes message to stdout
