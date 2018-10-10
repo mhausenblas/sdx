@@ -2,7 +2,7 @@
 
 This is a prototype of a command line tool called `kube-sdx`, enabling you to automatically switch between different Kubernetes clusters and continue your work uninterrupted. The `sdx` stands for seamless Developer Experience (DX) for short and the goal is to help support you in your developing on Kubernetes workflow.
 
-![screen shot of kube-sdx](img/kube-sdx-screen-shot.png)
+
 
 - [Prerequisits](#prerequisits)
 - [Install](#install)

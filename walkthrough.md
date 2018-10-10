@@ -62,6 +62,10 @@ Nuked local cache, all state gone. Thanks for using kube-sdx and have a nice day
 $
 ```
 
+And here in color:
+
+![screen shot of kube-sdx](img/kube-sdx-screen-shot.png)
+
 Note that following:
 
 - Messages in yellow are from the connection detection module
