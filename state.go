@@ -98,9 +98,6 @@ func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, er
 			}
 			return "", err
 		}
-		if verbose {
-			fmt.Printf("Successfully restored state:\n%v\n", res)
-		}
 	}
 	return res, err
 }
