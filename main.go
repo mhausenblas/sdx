@@ -15,6 +15,10 @@ const (
 	StatusOnline = "ONLINE"
 	// StatusOffline signals we do not have access to the remote cluster:
 	StatusOffline = "OFFLINE"
+	// ContextLocal represents the local context
+	ContextLocal = "local"
+	// ContextRemote represents the remote context
+	ContextRemote = "remote"
 	// ProbeTimeoutSeconds defines how long to try to get a result when probing:
 	ProbeTimeoutSeconds = 5
 	// CheckConnectionDelaySeconds defines how long to wait between two connection checks:
