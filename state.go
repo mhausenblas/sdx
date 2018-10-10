@@ -12,6 +12,31 @@ import (
 	"github.com/mhausenblas/kubecuddler"
 )
 
+// initcache sets up $StateCacheDir/$state/ directories.
+func initcache(verbose bool) {
+	targetdir := filepath.Join(StateCacheDir, StatusOffline)
+	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
+		e := os.MkdirAll(targetdir, os.ModePerm)
+		if err != nil {
+			if verbose {
+				displayerr("Can't create state cache", e)
+			}
+		}
+	}
+	targetdir = filepath.Join(StateCacheDir, StatusOnline)
+	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
+		e := os.MkdirAll(targetdir, os.ModePerm)
+		if err != nil {
+			if verbose {
+				displayerr("Can't create state cache", e)
+			}
+		}
+	}
+	if verbose {
+		displayinfo(fmt.Sprintf("\nSet up local cache in %v", StateCacheDir))
+	}
+}
+
 // ensure checks if, depending on the status, the remote or local
 // context are set up correctly, for example, if the namespace exists locally.
 func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string) error {
@@ -67,9 +92,6 @@ func capture(withstderr, verbose bool, namespace, resources string) (string, err
 // It returns the timestamp  in Unix time of when the file was written.
 func dump(status, yamldoc string) (string, error) {
 	targetdir := filepath.Join(StateCacheDir, status)
-	if _, err := os.Stat(targetdir); os.IsNotExist(err) {
-		_ = os.Mkdir(targetdir, os.ModePerm)
-	}
 	ts := time.Now().UnixNano()
 	fn := filepath.Join(targetdir, StateFile)
 	// make sure we drop the cluster IP spec field for services:

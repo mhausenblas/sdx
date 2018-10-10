@@ -51,6 +51,8 @@ func main() {
 	if *cremote == "" {
 		handlenoremote()
 	}
+	// make sure local cache is ready:
+	initcache(*verbose)
 	// make sure we don't leave some crap state in the local cache
 	// when user exits via CTRL+C:
 	c := make(chan os.Signal)
