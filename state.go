@@ -57,7 +57,7 @@ func ensure(withstderr, verbose bool, namespace, status, clocal, cremote string)
 		displayinfo(fmt.Sprintf("Recreated namespace [%v] in local context", namespace))
 	case StatusOnline:
 		if verbose {
-			displayinfo(fmt.Sprintf("Checking if remote context [%v] is ready\n", cremote))
+			displayinfo(fmt.Sprintf("Checking if remote context [%v] is ready", cremote))
 		}
 	}
 	return nil
@@ -103,7 +103,7 @@ func dump(status, yamldoc string) (string, error) {
 func restorefrom(withstderr, verbose bool, state, tsLast string) (res string, err error) {
 	statefile := filepath.Join(StateCacheDir, state, StateFile)
 	if verbose {
-		fmt.Printf("Trying to restore state from %v/%v@%v\n", state, StateFile, tsLast)
+		displayinfo(fmt.Sprintf("Trying to restore state from %v/%v@%v", state, StateFile, tsLast))
 	}
 	if _, err = os.Stat(statefile); !os.IsNotExist(err) {
 		res, err = kubecuddler.Kubectl(withstderr, verbose, kubectlbin, "apply", "--filename="+statefile)
