@@ -16,7 +16,7 @@ This is a prototype of a command line tool called `kube-sdx`, enabling you to au
 
 ## Use cases
 
-
+In the real world we seldomly have a single Kubernetes environment we're using but two or more we're switching between. This might be because we want to (testing) or we have to (offline environments such as on travel). Whenever you have two clusters (contexts) and want to continuously develop and deploy stuff, then `kube-sdx` is for you.
 
 ## Prerequisits
 
@@ -54,7 +54,7 @@ $ chmod +x kube-sdx
 
 ## Use
 
-In the real world we seldomly have a single Kubernetes environment we're using but two or more we're switching between. This might be because we want to (testing) or we have to (offline environments such as on travel). Whenever you have two clusters (contexts) and want to continuously develop and deploy stuff, then `kube-sdx` is for you.
+First, learn about the basic usage, then how to tell `kube-sdx` about what and where to watch, and finally about some advanced usage via interactive control.
 
 ### Basics
 
