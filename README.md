@@ -4,6 +4,7 @@ This is a prototype of a command line tool called `kube-sdx`, enabling you to au
 
 ![kube-sdx architecture](img/kubed-sdx-arch.png)
 
+- [Use cases](#use-cases)
 - [Prerequisits](#prerequisits)
 - [Install](#install)
 - [Use](#use)
@@ -12,6 +13,10 @@ This is a prototype of a command line tool called `kube-sdx`, enabling you to au
     - [Interactive control](#interactive-control)
 - [Platform-specific notes](#platform-specific-notes)
 - [How it works](#how-it-works)
+
+## Use cases
+
+
 
 ## Prerequisits
 
@@ -48,6 +53,8 @@ $ chmod +x kube-sdx
 ```
 
 ## Use
+
+In the real world we seldomly have a single Kubernetes environment we're using but two or more we're switching between. This might be because we want to (testing) or we have to (offline environments such as on travel). Whenever you have two clusters (contexts) and want to continuously develop and deploy stuff, then `kube-sdx` is for you.
 
 ### Basics
 
@@ -111,9 +118,13 @@ Under Windows, you *must* specify the `SDX_KUBECTL_BIN` environment variable, si
 
 ## How it works
 
-In a nutshell, `kube-sdx` keeps an eye on the API server of the configured remote cluster (via a simple HTTP `GET`) and if the connection detection fails, assumes you're offline. Once in offline mode, `kube-sdx` switches over to the local cluster and you can continue your work there. In the background, `kube-sdx` takes regular snapshots of certain key resources such as deployments or services and stores them in YAML docs that get applied to the respective environment, when a switch occurs.
+In a nutshell, `kube-sdx` keeps an eye on the API server of the configured remote cluster (via a simple HTTP `GET`) and if the connection detection fails, assumes you're offline. Once in offline mode, `kube-sdx` switches over to the local context and you can continue your work there. In the background, `kube-sdx` captures regular snapshots of certain key resources such as deployments or services and stores them in a YAML doc that gets applied to the respective environment, whenever a context switch occurs. 
 
-**Local development.** If you want to play around with `kube-sdx` or extend it, here's what's needed:
+Note that the naming of `local` and `remote` context is somewhat arbitrary, one could also call it primary and secondary context. The point being: the connection detection works against the remote (primary) context and the state capture and restore is on a bi-directional basis. This means that if your remote goes offline and you continue to work locally—for example, adding a new deployment—this will be reflected in the remote context once it comes back online again, and vice versa.
+
+## Local development
+
+If you want to play around with `kube-sdx` or extend it, here's what's needed:
 
 ```bash
 $ go version
