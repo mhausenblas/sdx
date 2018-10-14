@@ -71,14 +71,3 @@ func clusterfromcontext(kubectx string) string {
 		return kubectx
 	}
 }
-
-// resolvectx resolves the context reference, returning the context to use.
-func resolvectx(cremote, clocal string) string {
-	switch ccurrent {
-	case ContextLocal:
-		return clocal
-	case ContextRemote:
-		return cremote
-	}
-	return ""
-}
